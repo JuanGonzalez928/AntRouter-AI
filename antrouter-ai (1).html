@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AntRouter AI — Logística de Última Milla</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #08090f;
+  --bg2: #0e1019;
+  --bg3: #141722;
+  --bg4: #1a1f2e;
+  --blue: #3d7fff;
+  --blue2: #2563eb;
+  --cyan: #00d4ff;
+  --amber: #f59e0b;
+  --green: #10b981;
+  --red: #ef4444;
+  --purple: #8b5cf6;
+  --text: #e8eaf0;
+  --text-muted: #5a6380;
+  --text-mid: #8892a4;
+  --border: rgba(61,127,255,0.15);
+  --border2: rgba(61,127,255,0.08);
+  --blue-dim: rgba(61,127,255,0.1);
+  --blue-glow: rgba(61,127,255,0.3);
+  --cyan-dim: rgba(0,212,255,0.1);
+  --r: 14px;
+  --r-sm: 10px;
+  --mono: 'IBM Plex Mono', monospace;
+  --display: 'Syne', sans-serif;
+  --body: 'Outfit', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100dvh;overflow:hidden;display:flex;justify-content:center;align-items:center;}
+
+/* ── SHELL ── */
+.shell{width:100%;max-width:430px;height:100dvh;max-height:932px;background:var(--bg);position:relative;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 0 120px rgba(61,127,255,0.07),0 0 40px rgba(0,0,0,0.8);}
+
+/* ── STATUS BAR ── */
+.sbar{display:flex;justify-content:space-between;align-items:center;padding:10px 20px 6px;font-family:var(--mono);font-size:11px;color:var(--text-muted);flex-shrink:0;z-index:200;}
+.sbar-right{display:flex;gap:8px;align-items:center;}
+.sig{display:flex;gap:2px;align-items:flex-end;}
+.sig-b{width:3px;border-radius:1px;background:var(--blue);}
+
+/* ── SCREENS ── */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity 0.4s ease;z-index:1;}
+.screen.active{opacity:1;pointer-events:all;z-index:10;}
+
+/* ── NAV BAR (bottom) ── */
+.navbar{display:flex;background:var(--bg2);border-top:1px solid var(--border2);flex-shrink:0;z-index:100;position:relative;}
+.nb-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;cursor:pointer;gap:4px;transition:all 0.2s;position:relative;}
+.nb-icon{font-size:20px;transition:transform 0.2s;}
+.nb-label{font-size:9px;font-family:var(--mono);color:var(--text-muted);transition:color 0.2s;letter-spacing:0.5px;text-transform:uppercase;}
+.nb-item.active .nb-label{color:var(--blue);}
+.nb-item.active .nb-icon{transform:scale(1.15);}
+.nb-indicator{position:absolute;top:0;left:50%;transform:translateX(-50%);height:2px;width:28px;background:var(--blue);border-radius:0 0 2px 2px;opacity:0;transition:opacity 0.2s;box-shadow:0 0 8px var(--blue);}
+.nb-item.active .nb-indicator{opacity:1;}
+
+/* ═══════════════════════════════════
+   SCREEN 1 — DASHBOARD / HOME
+═══════════════════════════════════ */
+#s-home{padding-top:0;}
+.home-header{padding:14px 20px 12px;flex-shrink:0;}
+.home-greeting{font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+.home-title{font-family:var(--display);font-size:26px;font-weight:800;line-height:1.1;}
+.home-title span{color:var(--blue);}
+.home-sub{font-size:12px;color:var(--text-muted);margin-top:3px;}
+
+/* Hero metrics */
+.metrics-hero{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px;margin-bottom:14px;}
+.metric-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:16px;position:relative;overflow:hidden;}
+.metric-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--blue-dim),transparent);opacity:0.6;}
+.metric-card.wide{grid-column:1/-1;display:flex;gap:16px;}
+.mc-icon{font-size:22px;margin-bottom:8px;}
+.mc-val{font-family:var(--display);font-size:28px;font-weight:800;color:var(--blue);line-height:1;}
+.mc-val.green{color:var(--green);}
+.mc-val.amber{color:var(--amber);}
+.mc-val.red{color:var(--red);}
+.mc-lbl{font-size:11px;color:var(--text-muted);margin-top:4px;font-family:var(--mono);}
+.mc-trend{font-family:var(--mono);font-size:10px;color:var(--green);position:absolute;top:12px;right:12px;}
+
+/* Recent services */
+.section-header{display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin-bottom:10px;}
+.section-title{font-family:var(--display);font-size:14px;font-weight:700;}
+.section-action{font-family:var(--mono);font-size:10px;color:var(--blue);cursor:pointer;}
+
+.services-list{flex:1;overflow-y:auto;padding:0 20px 8px;}
+.services-list::-webkit-scrollbar{width:0;}
+
+.svc-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:14px;margin-bottom:10px;position:relative;overflow:hidden;cursor:pointer;transition:border-color 0.2s,transform 0.15s;}
+.svc-card:active{transform:scale(0.98);}
+.svc-card:hover{border-color:var(--border);}
+.svc-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.svc-id{font-family:var(--mono);font-size:11px;color:var(--text-muted);}
+.svc-badge{font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:20px;font-weight:600;}
+.svc-badge.transit{background:rgba(61,127,255,0.15);color:var(--blue);border:1px solid rgba(61,127,255,0.3);}
+.svc-badge.pending{background:rgba(245,158,11,0.15);color:var(--amber);border:1px solid rgba(245,158,11,0.3);}
+.svc-badge.done{background:rgba(16,185,129,0.15);color:var(--green);border:1px solid rgba(16,185,129,0.3);}
+.svc-route{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+.svc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.svc-dot.origin{background:var(--blue);}
+.svc-dot.dest{background:var(--green);}
+.svc-line{flex:1;height:1px;background:var(--border);position:relative;}
+.svc-line::after{content:'›';position:absolute;top:-8px;right:-2px;color:var(--text-muted);font-size:12px;}
+.svc-addr{font-size:12px;color:var(--text);font-weight:500;}
+.svc-addr.muted{color:var(--text-muted);font-size:11px;}
+.svc-bottom{display:flex;justify-content:space-between;align-items:center;}
+.svc-messenger{display:flex;align-items:center;gap:6px;}
+.svc-avatar{width:24px;height:24px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:13px;border:1px solid var(--border);}
+.svc-mname{font-size:11px;color:var(--text-muted);}
+.svc-val{font-family:var(--mono);font-size:13px;color:var(--green);font-weight:600;}
+
+/* Pulse dot on transit */
+.pulse-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--blue);animation:pulse 1.5s ease infinite;margin-right:4px;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(61,127,255,0.5)}50%{box-shadow:0 0 0 6px transparent}}
+
+/* ═══════════════════════════════════
+   SCREEN 2 — NUEVO SERVICIO
+═══════════════════════════════════ */
+#s-new{display:flex;flex-direction:column;}
+.form-header{padding:14px 20px 12px;flex-shrink:0;}
+.form-scroll{flex:1;overflow-y:auto;padding:0 20px;padding-bottom:16px;}
+.form-scroll::-webkit-scrollbar{width:0;}
+
+.form-section{margin-bottom:20px;}
+.form-section-label{font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.form-section-label::after{content:'';flex:1;height:1px;background:var(--border2);}
+
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:11px;color:var(--text-muted);margin-bottom:6px;font-family:var(--mono);}
+.field input,.field select,.field textarea{
+  width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);
+  color:var(--text);font-family:var(--body);font-size:14px;padding:12px 14px;
+  outline:none;transition:border-color 0.2s,box-shadow 0.2s;
+  -webkit-appearance:none;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--blue);box-shadow:0 0 0 3px rgba(61,127,255,0.1);
+}
+.field input::placeholder{color:var(--text-muted);}
+.field textarea{resize:none;height:70px;}
+.field select option{background:var(--bg3);}
+
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+.location-field{position:relative;}
+.location-field input{padding-right:44px;}
+.loc-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--blue-dim);border:none;border-radius:6px;color:var(--blue);padding:6px 8px;cursor:pointer;font-size:14px;}
+
+.btn-ai-suggest{width:100%;padding:14px;background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(61,127,255,0.2));border:1px solid rgba(139,92,246,0.4);border-radius:var(--r);color:var(--text);font-family:var(--body);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;margin-bottom:14px;}
+.btn-ai-suggest:hover{background:linear-gradient(135deg,rgba(139,92,246,0.3),rgba(61,127,255,0.3));}
+
+.ai-suggestion-box{background:var(--bg3);border:1px solid rgba(139,92,246,0.4);border-radius:var(--r);padding:16px;margin-bottom:16px;display:none;}
+.ai-suggestion-box.show{display:block;animation:fadeSlide 0.4s ease;}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.ai-title{font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.ai-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border2);}
+.ai-row:last-child{border-bottom:none;padding-bottom:0;}
+.ai-row-label{font-size:12px;color:var(--text-muted);}
+.ai-row-val{font-family:var(--mono);font-size:13px;color:var(--text);font-weight:600;}
+.ai-row-val.highlight{color:var(--purple);}
+.ai-confidence{display:flex;align-items:center;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border2);}
+.ai-conf-bar{flex:1;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;}
+.ai-conf-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--blue));border-radius:2px;width:91%;}
+.ai-conf-label{font-family:var(--mono);font-size:10px;color:var(--purple);}
+
+.btn-create{width:100%;padding:16px;background:var(--blue);border:none;border-radius:var(--r);color:#fff;font-family:var(--display);font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 0 24px var(--blue-glow);transition:all 0.2s;position:relative;overflow:hidden;}
+.btn-create::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,0.1),transparent);transform:translateX(-100%);animation:shimmer 3s ease infinite 2s;}
+@keyframes shimmer{0%{transform:translateX(-100%)}40%,100%{transform:translateX(100%)}}
+.btn-create:active{transform:scale(0.98);}
+
+/* ═══════════════════════════════════
+   SCREEN 3 — MAPA
+═══════════════════════════════════ */
+#s-map{display:flex;flex-direction:column;}
+.map-header{padding:14px 20px 10px;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;}
+.map-filter-row{display:flex;gap:6px;padding:0 20px 10px;flex-shrink:0;overflow-x:auto;}
+.map-filter-row::-webkit-scrollbar{height:0;}
+.filter-chip{font-family:var(--mono);font-size:10px;padding:6px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--bg2);color:var(--text-muted);cursor:pointer;white-space:nowrap;transition:all 0.2s;flex-shrink:0;}
+.filter-chip.active{background:var(--blue-dim);border-color:var(--blue);color:var(--blue);}
+
+.map-wrap{flex:1;position:relative;overflow:hidden;margin:0 16px;border-radius:var(--r);border:1px solid var(--border2);}
+#mapCanvas{width:100%;height:100%;display:block;cursor:pointer;}
+.map-legend{position:absolute;top:10px;right:10px;background:rgba(8,9,15,0.85);backdrop-filter:blur(8px);border:1px solid var(--border2);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:5px;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:10px;font-family:var(--mono);color:var(--text-muted);}
+.legend-dot{width:8px;height:8px;border-radius:50%;}
+
+.map-active-card{position:absolute;bottom:12px;left:12px;right:12px;background:rgba(8,9,15,0.92);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:none;}
+.map-active-card.show{display:block;animation:slideUp 0.3s ease;}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.mac-top{display:flex;justify-content:space-between;margin-bottom:8px;}
+.mac-id{font-family:var(--mono);font-size:11px;color:var(--blue);}
+.mac-close{color:var(--text-muted);cursor:pointer;font-size:16px;background:none;border:none;color:var(--text-muted);}
+.mac-route{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.mac-point{display:flex;align-items:center;gap:8px;font-size:12px;}
+.mac-point-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.mac-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.mac-metric{text-align:center;background:var(--bg3);border-radius:8px;padding:8px 4px;}
+.mac-mv{font-family:var(--mono);font-size:13px;color:var(--text);display:block;}
+.mac-ml{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+
+/* ═══════════════════════════════════
+   SCREEN 4 — MENSAJEROS
+═══════════════════════════════════ */
+#s-messengers{display:flex;flex-direction:column;}
+.mess-header{padding:14px 20px 12px;flex-shrink:0;}
+.mess-list{flex:1;overflow-y:auto;padding:0 20px 8px;}
+.mess-list::-webkit-scrollbar{width:0;}
+
+.mess-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:16px;margin-bottom:10px;cursor:pointer;transition:all 0.2s;}
+.mess-card:hover{border-color:var(--border);}
+.mess-card-top{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.mess-avatar{width:44px;height:44px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid var(--border);flex-shrink:0;position:relative;}
+.mess-status-ring{position:absolute;bottom:0;right:0;width:12px;height:12px;border-radius:50%;border:2px solid var(--bg2);}
+.mess-status-ring.online{background:var(--green);}
+.mess-status-ring.busy{background:var(--amber);}
+.mess-status-ring.offline{background:var(--text-muted);}
+.mess-info{flex:1;}
+.mess-name{font-family:var(--display);font-size:16px;font-weight:700;}
+.mess-meta{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.mess-assign-btn{background:var(--blue-dim);border:1px solid var(--border);border-radius:8px;color:var(--blue);font-size:11px;padding:6px 12px;cursor:pointer;font-family:var(--mono);transition:all 0.2s;white-space:nowrap;}
+.mess-assign-btn:hover{background:rgba(61,127,255,0.2);}
+.mess-assign-btn.assigned{background:rgba(16,185,129,0.15);border-color:rgba(16,185,129,0.3);color:var(--green);}
+
+.mess-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.mess-stat{background:var(--bg3);border-radius:8px;padding:8px 4px;text-align:center;}
+.mess-sv{font-family:var(--mono);font-size:13px;color:var(--text);display:block;}
+.mess-sl{font-size:9px;color:var(--text-muted);text-transform:uppercase;}
+
+.mess-route-preview{margin-top:10px;padding-top:10px;border-top:1px solid var(--border2);display:flex;align-items:center;gap:6px;}
+.mrp-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);animation:pulse 1.5s ease infinite;}
+.mrp-text{font-size:11px;color:var(--text-muted);}
+
+/* AI Badge on messenger */
+.ai-pick-badge{display:flex;align-items:center;gap:4px;background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(61,127,255,0.15));border:1px solid rgba(139,92,246,0.3);border-radius:20px;padding:3px 8px;font-family:var(--mono);font-size:9px;color:var(--purple);margin-top:6px;width:fit-content;}
+
+/* ── COMMON TOPBAR ── */
+.topbar2{padding:14px 20px 10px;flex-shrink:0;display:flex;align-items:center;gap:12px;}
+.btn-back2{width:34px;height:34px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);font-size:16px;flex-shrink:0;}
+.topbar2-title{font-family:var(--display);font-size:18px;font-weight:800;flex:1;}
+
+/* ── TOAST ── */
+.toast{position:absolute;top:70px;left:50%;transform:translateX(-50%) translateY(-16px);background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:13px;color:var(--text);opacity:0;transition:all 0.4s ease;z-index:999;white-space:nowrap;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,0.5),0 0 20px var(--blue-glow);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── Modal overlay ── */
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:500;display:none;align-items:flex-end;}
+.modal-overlay.show{display:flex;animation:fadeIn 0.2s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-sheet{width:100%;background:var(--bg2);border-radius:24px 24px 0 0;border:1px solid var(--border);border-bottom:none;padding:20px;animation:slideUp2 0.3s ease;}
+@keyframes slideUp2{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px;}
+.modal-title{font-family:var(--display);font-size:20px;font-weight:800;margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--text-muted);margin-bottom:20px;}
+
+.btn-modal-primary{width:100%;padding:16px;background:var(--blue);border:none;border-radius:var(--r);color:#fff;font-family:var(--display);font-size:16px;font-weight:700;cursor:pointer;margin-bottom:10px;box-shadow:0 0 24px var(--blue-glow);}
+.btn-modal-secondary{width:100%;padding:14px;background:transparent;border:1px solid var(--border2);border-radius:var(--r);color:var(--text-muted);font-family:var(--body);font-size:14px;cursor:pointer;}
+
+/* ── Scrollbar global ── */
+::-webkit-scrollbar{width:0;}
+</style>
+</head>
+<body>
+<div class="shell" id="shell">
+
+  <!-- Status bar -->
+  <div class="sbar">
+    <span id="clock" style="font-family:var(--mono);font-size:11px">09:41</span>
+    <div class="sbar-right">
+      <span style="font-size:11px;color:var(--text-muted)">4G</span>
+      <div class="sig">
+        <div class="sig-b" style="height:5px"></div>
+        <div class="sig-b" style="height:8px"></div>
+        <div class="sig-b" style="height:11px"></div>
+        <div class="sig-b" style="height:14px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal" onclick="closeModal(event)">
+    <div class="modal-sheet" id="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="modal-title">Confirmar</div>
+      <div class="modal-sub" id="modal-sub">¿Deseas continuar?</div>
+      <button class="btn-modal-primary" id="modal-btn" onclick="">Confirmar</button>
+      <button class="btn-modal-secondary" onclick="document.getElementById('modal').classList.remove('show')">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 1: HOME / DASHBOARD ═══ -->
+  <div class="screen active" id="s-home">
+    <div class="home-header">
+      <div class="home-greeting">📦 Panel de control</div>
+      <h1 class="home-title">Ant<span>Router</span> AI</h1>
+      <div class="home-sub">Lunes, 28 de abril · Bogotá</div>
+    </div>
+
+    <div class="metrics-hero">
+      <div class="metric-card">
+        <div class="mc-icon">📦</div>
+        <div class="mc-val" id="m-total">8</div>
+        <div class="mc-lbl">SERVICIOS HOY</div>
+        <div class="mc-trend">+3 ↑</div>
+      </div>
+      <div class="metric-card">
+        <div class="mc-icon">🚴</div>
+        <div class="mc-val green" id="m-transit">3</div>
+        <div class="mc-lbl">EN TRÁNSITO</div>
+      </div>
+      <div class="metric-card wide">
+        <div style="flex:1">
+          <div class="mc-icon">✅</div>
+          <div class="mc-val green">5</div>
+          <div class="mc-lbl">ENTREGADOS</div>
+        </div>
+        <div style="flex:1">
+          <div class="mc-icon">⏳</div>
+          <div class="mc-val amber">2</div>
+          <div class="mc-lbl">PENDIENTES</div>
+        </div>
+        <div style="flex:1">
+          <div class="mc-icon">💰</div>
+          <div class="mc-val" style="font-size:20px;color:var(--green)">$184k</div>
+          <div class="mc-lbl">RECAUDO</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <div class="section-title">Servicios recientes</div>
+      <div class="section-action" onclick="switchScreen('new')">+ Nuevo</div>
+    </div>
+
+    <div class="services-list" id="homeServicesList"></div>
+  </div>
+
+  <!-- ═══ SCREEN 2: NUEVO SERVICIO ═══ -->
+  <div class="screen" id="s-new">
+    <div class="topbar2">
+      <div class="btn-back2" onclick="switchScreen('home')">←</div>
+      <div class="topbar2-title">Nuevo Servicio</div>
+    </div>
+
+    <div class="form-scroll">
+      <div class="form-section">
+        <div class="form-section-label">📍 Origen</div>
+        <div class="field location-field">
+          <label>Dirección de recogida</label>
+          <input type="text" id="f-origin" placeholder="Ej: Calle 72 #10-35" value="Calle 72 #10-35, Chapinero">
+          <button class="loc-btn">📌</button>
+        </div>
+        <div class="field">
+          <label>Contacto origen</label>
+          <input type="text" id="f-origin-contact" placeholder="Nombre y teléfono" value="Carlos López · 311 234 5678">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-label">🏁 Destino</div>
+        <div class="field location-field">
+          <label>Dirección de entrega</label>
+          <input type="text" id="f-dest" placeholder="Ej: Av. 68 #25-10" value="Av. El Dorado #68-50, Fontibón">
+          <button class="loc-btn">📌</button>
+        </div>
+        <div class="field">
+          <label>Contacto destino</label>
+          <input type="text" id="f-dest-contact" placeholder="Nombre y teléfono" value="María Torres · 300 987 6543">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-label">📋 Detalles del paquete</div>
+        <div class="field-row">
+          <div class="field">
+            <label>Tipo</label>
+            <select id="f-type">
+              <option>📦 Paquete</option>
+              <option>📄 Documento</option>
+              <option>🍱 Alimento</option>
+              <option>💊 Medicamento</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Valor declarado</label>
+            <input type="text" id="f-value" placeholder="$ 0" value="$ 45.000">
+          </div>
+        </div>
+        <div class="field">
+          <label>Notas adicionales</label>
+          <textarea id="f-notes" placeholder="Instrucciones especiales...">Frágil. Entregar en portería.</textarea>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-label">🤖 Inteligencia Artificial</div>
+        <button class="btn-ai-suggest" onclick="aiSuggest()">
+          <span>✨</span> Sugerir mensajero y ruta óptima
+        </button>
+        <div class="ai-suggestion-box" id="aiBox">
+          <div class="ai-title">🤖 Recomendación IA · confianza 91%</div>
+          <div class="ai-row">
+            <span class="ai-row-label">Mensajero sugerido</span>
+            <span class="ai-row-val highlight">🚴 Diego Ramírez</span>
+          </div>
+          <div class="ai-row">
+            <span class="ai-row-label">Ruta optimizada</span>
+            <span class="ai-row-val">8.4 km · 24 min</span>
+          </div>
+          <div class="ai-row">
+            <span class="ai-row-label">Tiempo estimado</span>
+            <span class="ai-row-val">Llegada 10:32 AM</span>
+          </div>
+          <div class="ai-row">
+            <span class="ai-row-label">Costo flete sugerido</span>
+            <span class="ai-row-val highlight">$ 12.500</span>
+          </div>
+          <div class="ai-confidence">
+            <span class="ai-conf-label">Confianza IA:</span>
+            <div class="ai-conf-bar"><div class="ai-conf-fill"></div></div>
+            <span class="ai-conf-label">91%</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-create" onclick="createService()">
+        Crear Servicio ›
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 3: MAPA ═══ -->
+  <div class="screen" id="s-map">
+    <div class="map-header">
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:2px;text-transform:uppercase;">Seguimiento</div>
+        <div style="font-family:var(--display);font-size:20px;font-weight:800;">Mapa en vivo</div>
+      </div>
+      <div style="font-family:var(--mono);font-size:10px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:var(--green);padding:6px 10px;border-radius:20px;display:flex;align-items:center;gap:4px;">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;display:inline-block;"></span>
+        LIVE
+      </div>
+    </div>
+
+    <div class="map-filter-row">
+      <div class="filter-chip active">Todos</div>
+      <div class="filter-chip">En tránsito</div>
+      <div class="filter-chip">Pendientes</div>
+      <div class="filter-chip">Completados</div>
+    </div>
+
+    <div class="map-wrap">
+      <canvas id="mapCanvas"></canvas>
+      <div class="map-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Origen</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Destino</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Mensajero</div>
+      </div>
+      <div class="map-active-card" id="mapCard">
+        <div class="mac-top">
+          <span class="mac-id" id="mac-id">SVC-001</span>
+          <button class="mac-close" onclick="document.getElementById('mapCard').classList.remove('show')">×</button>
+        </div>
+        <div class="mac-route">
+          <div class="mac-point">
+            <div class="mac-point-dot" style="background:var(--blue)"></div>
+            <span id="mac-origin" style="font-size:12px">Calle 72 #10-35</span>
+          </div>
+          <div style="padding-left:3px;border-left:2px dashed var(--border2);height:10px;margin-left:3px;"></div>
+          <div class="mac-point">
+            <div class="mac-point-dot" style="background:var(--green)"></div>
+            <span id="mac-dest" style="font-size:12px">Av. El Dorado #68-50</span>
+          </div>
+        </div>
+        <div class="mac-metrics">
+          <div class="mac-metric">
+            <span class="mac-mv" id="mac-dist">8.4km</span>
+            <span class="mac-ml">Distancia</span>
+          </div>
+          <div class="mac-metric">
+            <span class="mac-mv" id="mac-eta">24min</span>
+            <span class="mac-ml">ETA</span>
+          </div>
+          <div class="mac-metric">
+            <span class="mac-mv" id="mac-status">🔵</span>
+            <span class="mac-ml">Estado</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:12px 16px 8px;flex-shrink:0;font-family:var(--mono);font-size:10px;color:var(--text-muted);display:flex;justify-content:space-between;">
+      <span>Toca un punto para ver detalles</span>
+      <span id="mapCount">3 activos</span>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 4: MENSAJEROS ═══ -->
+  <div class="screen" id="s-messengers">
+    <div class="mess-header">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Equipo</div>
+      <div style="font-family:var(--display);font-size:22px;font-weight:800;">Mensajeros</div>
+    </div>
+
+    <div style="padding:0 20px 10px;flex-shrink:0;display:flex;gap:8px;">
+      <div style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;text-align:center;">
+        <div style="font-family:var(--mono);font-size:18px;color:var(--green);">3</div>
+        <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Activos</div>
+      </div>
+      <div style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;text-align:center;">
+        <div style="font-family:var(--mono);font-size:18px;color:var(--amber);">1</div>
+        <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Ocupados</div>
+      </div>
+      <div style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;text-align:center;">
+        <div style="font-family:var(--mono);font-size:18px;color:var(--text-muted);">1</div>
+        <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Offline</div>
+      </div>
+    </div>
+
+    <div class="mess-list" id="messengerList"></div>
+  </div>
+
+  <!-- ── BOTTOM NAV ── -->
+  <div class="navbar" id="navbar">
+    <div class="nb-item active" onclick="switchScreen('home')" id="nb-home">
+      <div class="nb-indicator"></div>
+      <div class="nb-icon">🏠</div>
+      <div class="nb-label">Panel</div>
+    </div>
+    <div class="nb-item" onclick="switchScreen('new')" id="nb-new">
+      <div class="nb-indicator"></div>
+      <div class="nb-icon">➕</div>
+      <div class="nb-label">Nuevo</div>
+    </div>
+    <div class="nb-item" onclick="switchScreen('map')" id="nb-map">
+      <div class="nb-indicator"></div>
+      <div class="nb-icon">🗺️</div>
+      <div class="nb-label">Mapa</div>
+    </div>
+    <div class="nb-item" onclick="switchScreen('messengers')" id="nb-messengers">
+      <div class="nb-indicator"></div>
+      <div class="nb-icon">🚴</div>
+      <div class="nb-label">Equipo</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────
+const services = [
+  { id:'SVC-001', origin:'Calle 72 #10-35, Chapinero', dest:'Av. El Dorado #68-50, Fontibón', status:'transit', messenger:'Diego R.', value:'$12.500', dist:'8.4km', eta:'24min', emoji:'🚴' },
+  { id:'SVC-002', origin:'Carrera 15 #85-42, Usaquén', dest:'Calle 26 #92-32, El Salitre', status:'transit', messenger:'Camila V.', value:'$9.800', dist:'6.1km', eta:'18min', emoji:'🛵' },
+  { id:'SVC-003', origin:'Calle 100 #19-61, Norte', dest:'Carrera 30 #45-30, Teusaquillo', status:'pending', messenger:'Sin asignar', value:'$15.200', dist:'7.3km', eta:'--', emoji:'⏳' },
+  { id:'SVC-004', origin:'Av. 68 #25-10, Normandía', dest:'Calle 13 #37-15, Centro', status:'transit', messenger:'Luis M.', value:'$8.000', dist:'4.9km', eta:'12min', emoji:'🚴' },
+  { id:'SVC-005', origin:'Calle 45 #10-25, Palermo', dest:'Carrera 7 #32-16, La Candelaria', status:'done', messenger:'Diego R.', value:'$11.000', dist:'5.2km', eta:'✅', emoji:'✅' },
+  { id:'SVC-006', origin:'Carrera 50 #12-40, Kennedy', dest:'Calle 80 #44-10, Engativá', status:'done', messenger:'Camila V.', value:'$14.500', dist:'9.1km', eta:'✅', emoji:'✅' },
+  { id:'SVC-007', origin:'Calle 127 #15-23, Cedritos', dest:'Av. Boyacá #72-90, Álamos', status:'pending', messenger:'Sin asignar', value:'$18.000', dist:'12.3km', eta:'--', emoji:'⏳' },
+  { id:'SVC-008', origin:'Carrera 9 #70-45, El Nogal', dest:'Calle 53 #103-59, Suba', status:'done', messenger:'Luis M.', value:'$10.200', dist:'6.8km', eta:'✅', emoji:'✅' },
+];
+
+const messengers = [
+  { id:1, name:'Diego Ramírez', emoji:'🧑', vehicle:'Bicicleta eléctrica', zone:'Centro · Norte', status:'online', services:3, rating:4.9, km:42, time:'3h20m', isAIPick:true },
+  { id:2, name:'Camila Valencia', emoji:'👩', vehicle:'Moto 125cc', zone:'Norte · Usaquén', status:'online', services:4, rating:4.8, km:78, time:'5h10m', isAIPick:false },
+  { id:3, name:'Luis Mendoza', emoji:'🧔', vehicle:'Bicicleta', zone:'Occidente · Sur', status:'busy', services:2, rating:4.7, km:31, time:'2h45m', isAIPick:false },
+  { id:4, name:'Paola Jiménez', emoji:'👩‍🦱', vehicle:'Moto 200cc', zone:'Sur · Kennedy', status:'online', services:1, rating:4.9, km:55, time:'4h00m', isAIPick:false },
+  { id:5, name:'Andrés Castro', emoji:'👨‍🦰', vehicle:'Bicicleta', zone:'—', status:'offline', services:0, rating:4.6, km:0, time:'—', isAIPick:false },
+];
+
+// ─── CLOCK ──────────────────────────────────────────────
+function updateClock() {
+  const n = new Date();
+  document.getElementById('clock').textContent =
+    String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+}
+updateClock(); setInterval(updateClock, 60000);
+
+// ─── TOAST ──────────────────────────────────────────────
+function showToast(msg, duration=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ─── NAVIGATION ─────────────────────────────────────────
+const screenMap = { home:'s-home', new:'s-new', map:'s-map', messengers:'s-messengers' };
+let currentScreen = 'home';
+
+function switchScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenMap[name]).classList.add('active');
+
+  document.querySelectorAll('.nb-item').forEach(n => n.classList.remove('active'));
+  const nb = document.getElementById('nb-' + name);
+  if (nb) nb.classList.add('active');
+
+  currentScreen = name;
+  if (name === 'home') renderHome();
+  if (name === 'map') initMapCanvas();
+  if (name === 'messengers') renderMessengers();
+}
+
+// ─── HOME RENDER ────────────────────────────────────────
+function renderHome() {
+  const list = document.getElementById('homeServicesList');
+  list.innerHTML = '';
+  services.forEach(s => {
+    const statusLabel = s.status === 'transit' ? 'En tránsito' : s.status === 'pending' ? 'Pendiente' : 'Entregado';
+    const div = document.createElement('div');
+    div.className = 'svc-card';
+    div.innerHTML = `
+      <div class="svc-card-top">
+        <span class="svc-id">${s.id}</span>
+        <span class="svc-badge ${s.status}">${s.status==='transit'?'<span class="pulse-dot"></span>':''}${statusLabel}</span>
+      </div>
+      <div class="svc-route">
+        <div class="svc-dot origin"></div>
+        <div class="svc-line"></div>
+        <div class="svc-dot dest"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <div>
+          <div class="svc-addr">${s.origin.split(',')[0]}</div>
+          <div class="svc-addr muted">${s.dest.split(',')[0]}</div>
+        </div>
+      </div>
+      <div class="svc-bottom">
+        <div class="svc-messenger">
+          <div class="svc-avatar">${s.emoji}</div>
+          <span class="svc-mname">${s.messenger}</span>
+        </div>
+        <span class="svc-val">${s.value}</span>
+      </div>
+    `;
+    div.onclick = () => {
+      showToast(`📦 ${s.id} · ${statusLabel} · ${s.dist}`);
+    };
+    list.appendChild(div);
+  });
+}
+renderHome();
+
+// ─── FORM / AI ───────────────────────────────────────────
+let aiDone = false;
+function aiSuggest() {
+  if (aiDone) { document.getElementById('aiBox').classList.toggle('show'); return; }
+  showToast('🤖 Analizando disponibilidad y tráfico...');
+  setTimeout(() => {
+    document.getElementById('aiBox').classList.add('show');
+    aiDone = true;
+    showToast('✅ IA sugiere: Diego Ramírez · Ruta A · 24 min');
+  }, 1800);
+}
+
+let svcCounter = 9;
+function createService() {
+  const origin = document.getElementById('f-origin').value;
+  const dest = document.getElementById('f-dest').value;
+  if (!origin || !dest) { showToast('⚠️ Completa origen y destino'); return; }
+
+  document.getElementById('modal-title').textContent = '¿Crear servicio?';
+  document.getElementById('modal-sub').textContent = `De: ${origin.split(',')[0]}\nA: ${dest.split(',')[0]}`;
+  document.getElementById('modal-btn').textContent = '✅ Confirmar y crear';
+  document.getElementById('modal-btn').onclick = () => {
+    const newSvc = {
+      id: 'SVC-00' + svcCounter++,
+      origin, dest,
+      status: 'pending',
+      messenger: aiDone ? 'Diego R.' : 'Sin asignar',
+      value: document.getElementById('f-value').value || '$0',
+      dist: aiDone ? '8.4km' : '--',
+      eta: '--',
+      emoji: '⏳'
+    };
+    services.unshift(newSvc);
+    document.getElementById('modal').classList.remove('show');
+    document.getElementById('m-total').textContent = parseInt(document.getElementById('m-total').textContent) + 1;
+    aiDone = false;
+    document.getElementById('aiBox').classList.remove('show');
+    showToast('🎉 Servicio ' + newSvc.id + ' creado exitosamente');
+    setTimeout(() => switchScreen('home'), 1200);
+  };
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal')) {
+    document.getElementById('modal').classList.remove('show');
+  }
+}
+
+// ─── MESSENGERS ──────────────────────────────────────────
+function renderMessengers() {
+  const list = document.getElementById('messengerList');
+  list.innerHTML = '';
+  messengers.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'mess-card';
+    const statusColors = { online:'online', busy:'busy', offline:'offline' };
+    const statusLabels = { online:'Disponible', busy:'En servicio', offline:'Desconectado' };
+    div.innerHTML = `
+      <div class="mess-card-top">
+        <div class="mess-avatar">
+          ${m.emoji}
+          <div class="mess-status-ring ${statusColors[m.status]}"></div>
+        </div>
+        <div class="mess-info">
+          <div class="mess-name">${m.name}</div>
+          <div class="mess-meta">${m.vehicle} · ${m.zone}</div>
+          ${m.isAIPick ? '<div class="ai-pick-badge">✨ Recomendado por IA</div>' : ''}
+        </div>
+        <button class="mess-assign-btn ${m.status==='offline'?'':''}${m.status==='busy'?'assigned':''}" onclick="assignMessenger(${m.id}, '${m.name}', this)">
+          ${m.status==='busy' ? '✅ Asignado' : m.status==='offline' ? 'Offline' : 'Asignar'}
+        </button>
+      </div>
+      <div class="mess-stats">
+        <div class="mess-stat">
+          <span class="mess-sv">${m.services}</span>
+          <span class="mess-sl">Servicios</span>
+        </div>
+        <div class="mess-stat">
+          <span class="mess-sv" style="color:var(--amber)">⭐${m.rating}</span>
+          <span class="mess-sl">Rating</span>
+        </div>
+        <div class="mess-stat">
+          <span class="mess-sv">${m.km}km</span>
+          <span class="mess-sl">Hoy</span>
+        </div>
+        <div class="mess-stat">
+          <span class="mess-sv" style="font-size:11px">${m.time}</span>
+          <span class="mess-sl">Tiempo</span>
+        </div>
+      </div>
+      ${m.status === 'busy' ? `
+      <div class="mess-route-preview">
+        <div class="mrp-dot"></div>
+        <span class="mrp-text">En ruta · ${m.zone} · ETA aprox. 15 min</span>
+      </div>` : ''}
+    `;
+    list.appendChild(div);
+  });
+}
+renderMessengers();
+
+function assignMessenger(id, name, btn) {
+  const m = messengers.find(x => x.id === id);
+  if (!m || m.status === 'offline') { showToast('⚠️ Mensajero no disponible'); return; }
+  if (m.status === 'busy') { showToast(`ℹ️ ${name} ya tiene un servicio activo`); return; }
+
+  document.getElementById('modal-title').textContent = 'Asignar mensajero';
+  document.getElementById('modal-sub').textContent = `¿Asignar ${name} al siguiente servicio pendiente?`;
+  document.getElementById('modal-btn').textContent = '🚴 Confirmar asignación';
+  document.getElementById('modal-btn').onclick = () => {
+    m.status = 'busy';
+    m.services++;
+    document.getElementById('modal').classList.remove('show');
+    renderMessengers();
+    showToast(`✅ ${name} asignado exitosamente`);
+  };
+  document.getElementById('modal').classList.add('show');
+}
+
+// ─── MAP CANVAS ───────────────────────────────────────────
+let mapAnimFrame = null;
+let mapTime = 0;
+let mapNodes = [];
+
+function initMapCanvas() {
+  const canvas = document.getElementById('mapCanvas');
+  const wrap = canvas.parentElement;
+  canvas.width = wrap.offsetWidth;
+  canvas.height = wrap.offsetHeight;
+
+  // Define nodes representing service points in the city
+  mapNodes = [
+    // Orígenes (azul)
+    { x: 0.35, y: 0.22, type:'origin', label:'SVC-001', svc:services[0] },
+    { x: 0.62, y: 0.15, type:'origin', label:'SVC-002', svc:services[1] },
+    { x: 0.22, y: 0.45, type:'origin', label:'SVC-004', svc:services[3] },
+    // Destinos (verde)
+    { x: 0.20, y: 0.68, type:'dest', label:'Fontibón', svc:services[0] },
+    { x: 0.40, y: 0.72, type:'dest', label:'Salitre', svc:services[1] },
+    { x: 0.55, y: 0.60, type:'dest', label:'Teusaquillo', svc:services[3] },
+    // Mensajeros (ámbar, moving)
+    { x: 0.28, y: 0.44, type:'messenger', label:'Diego', vx:0.0006, vy:0.0005, svc:services[0] },
+    { x: 0.51, y: 0.35, type:'messenger', label:'Camila', vx:-0.0004, vy:0.0008, svc:services[1] },
+    { x: 0.36, y: 0.50, type:'messenger', label:'Luis', vx:0.0005, vy:0.0003, svc:services[3] },
+  ];
+
+  if (mapAnimFrame) cancelAnimationFrame(mapAnimFrame);
+  animateMap();
+}
+
+function animateMap() {
+  const canvas = document.getElementById('mapCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  mapTime += 0.016;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // BG
+  const bg = ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#080b15');
+  bg.addColorStop(1,'#050810');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0,0,W,H);
+
+  // City grid streets
+  ctx.strokeStyle = 'rgba(61,127,255,0.08)';
+  ctx.lineWidth = 1;
+  // Horizontales
+  [0.15,0.3,0.45,0.6,0.75,0.88].forEach(y => {
+    ctx.beginPath(); ctx.moveTo(0, H*y); ctx.lineTo(W, H*y); ctx.stroke();
+  });
+  // Verticales
+  [0.12,0.28,0.44,0.6,0.76,0.9].forEach(x => {
+    ctx.beginPath(); ctx.moveTo(W*x, 0); ctx.lineTo(W*x, H); ctx.stroke();
+  });
+
+  // Diagonals (avenues)
+  ctx.strokeStyle = 'rgba(61,127,255,0.05)';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(0, H*0.1); ctx.lineTo(W, H*0.9); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W*0.1, 0); ctx.lineTo(W*0.9, H); ctx.stroke();
+
+  // City zones (colored areas)
+  const zones = [
+    { x:0.05, y:0.05, w:0.4, h:0.35, c:'rgba(61,127,255,0.04)' },
+    { x:0.5, y:0.05, w:0.45, h:0.35, c:'rgba(16,185,129,0.03)' },
+    { x:0.1, y:0.55, w:0.35, h:0.38, c:'rgba(245,158,11,0.03)' },
+    { x:0.5, y:0.45, w:0.42, h:0.45, c:'rgba(139,92,246,0.03)' },
+  ];
+  zones.forEach(z => {
+    ctx.fillStyle = z.c;
+    ctx.beginPath();
+    ctx.roundRect(W*z.x, H*z.y, W*z.w, H*z.h, 4);
+    ctx.fill();
+  });
+
+  // Routes between pairs
+  const pairs = [
+    { from: mapNodes[0], to: mapNodes[3], color:'rgba(61,127,255,0.3)' },
+    { from: mapNodes[1], to: mapNodes[4], color:'rgba(16,185,129,0.3)' },
+    { from: mapNodes[2], to: mapNodes[5], color:'rgba(245,158,11,0.3)' },
+  ];
+  pairs.forEach(p => {
+    const x1 = p.from.x * W, y1 = p.from.y * H;
+    const x2 = p.to.x * W, y2 = p.to.y * H;
+    // Dashed route
+    ctx.strokeStyle = p.color;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6, 5]);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    const mx = (x1+x2)/2 + (y2-y1)*0.3;
+    const my = (y1+y2)/2 - (x2-x1)*0.2;
+    ctx.quadraticCurveTo(mx, my, x2, y2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Animated packet along route
+    const t = (Math.sin(mapTime * 0.5 + pairs.indexOf(p)) * 0.5 + 0.5);
+    const bx = (1-t)*(1-t)*x1 + 2*(1-t)*t*mx + t*t*x2;
+    const by = (1-t)*(1-t)*y1 + 2*(1-t)*t*my + t*t*y2;
+    ctx.beginPath();
+    ctx.arc(bx, by, 3, 0, Math.PI*2);
+    ctx.fillStyle = p.color.replace('0.3','0.9');
+    ctx.fill();
+  });
+
+  // Move messenger nodes
+  mapNodes.filter(n => n.type === 'messenger').forEach(n => {
+    if (n.vx) {
+      n.x += n.vx * Math.sin(mapTime * 0.7 + n.vx * 1000);
+      n.y += n.vy * Math.cos(mapTime * 0.5 + n.vy * 1000);
+      n.x = Math.max(0.1, Math.min(0.9, n.x));
+      n.y = Math.max(0.1, Math.min(0.9, n.y));
+    }
+  });
+
+  // Draw nodes
+  mapNodes.forEach(n => {
+    const nx = n.x * W, ny = n.y * H;
+    const colors = { origin:'#3d7fff', dest:'#10b981', messenger:'#f59e0b' };
+    const c = colors[n.type];
+
+    // Glow
+    const grd = ctx.createRadialGradient(nx,ny,0,nx,ny,20);
+    grd.addColorStop(0, c.replace('#','rgba(').replace(/(..)(..)(..)/, (_, r,g,b) => `${parseInt(r,16)},${parseInt(g,16)},${parseInt(b,16)},0.25)`));
+    grd.addColorStop(1,'transparent');
+    ctx.fillStyle = grd;
+    ctx.beginPath(); ctx.arc(nx, ny, 20, 0, Math.PI*2); ctx.fill();
+
+    // Ping for messengers
+    if (n.type === 'messenger') {
+      const pingR = 10 + Math.sin(mapTime * 2) * 6;
+      ctx.strokeStyle = `rgba(245,158,11,${0.3 - Math.sin(mapTime*2)*0.1})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(nx, ny, pingR, 0, Math.PI*2); ctx.stroke();
+    }
+
+    // Node dot
+    ctx.beginPath();
+    ctx.arc(nx, ny, n.type==='messenger' ? 7 : 6, 0, Math.PI*2);
+    ctx.fillStyle = c;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(8,9,15,0.8)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Icon inside
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 8px IBM Plex Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const icons = { origin:'●', dest:'■', messenger:'▲' };
+    ctx.fillText(icons[n.type], nx, ny);
+
+    // Label
+    ctx.fillStyle = c;
+    ctx.font = '10px IBM Plex Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(n.label, nx, ny + 16);
+  });
+
+  mapAnimFrame = requestAnimationFrame(animateMap);
+}
+
+// Click on map
+document.getElementById('mapCanvas').addEventListener('click', e => {
+  const canvas = document.getElementById('mapCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+  const my = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+  // Find nearest node
+  let nearest = null, minDist = 40;
+  mapNodes.forEach(n => {
+    const d = Math.hypot(n.x * canvas.width - mx, n.y * canvas.height - my);
+    if (d < minDist) { nearest = n; minDist = d; }
+  });
+
+  if (nearest && nearest.svc) {
+    const s = nearest.svc;
+    document.getElementById('mac-id').textContent = s.id;
+    document.getElementById('mac-origin').textContent = s.origin.split(',')[0];
+    document.getElementById('mac-dest').textContent = s.dest.split(',')[0];
+    document.getElementById('mac-dist').textContent = s.dist;
+    document.getElementById('mac-eta').textContent = s.eta === '--' ? 'N/A' : s.eta;
+    document.getElementById('mac-status').textContent = s.status === 'transit' ? '🔵' : s.status === 'pending' ? '🟡' : '🟢';
+    document.getElementById('mapCard').classList.add('show');
+  }
+});
+
+// Filter chips
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+    showToast('Filtro: ' + this.textContent);
+  });
+});
+</script>
+</body>
+</html>
