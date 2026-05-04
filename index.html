@@ -2,972 +2,1573 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AntRouter AI — Logística de Última Milla</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AntRouter AI — Prototipo</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-:root {
-  --bg: #08090f;
-  --bg2: #0e1019;
-  --bg3: #141722;
-  --bg4: #1a1f2e;
-  --blue: #3d7fff;
-  --blue2: #2563eb;
-  --cyan: #00d4ff;
-  --amber: #f59e0b;
-  --green: #10b981;
-  --red: #ef4444;
-  --purple: #8b5cf6;
-  --text: #e8eaf0;
-  --text-muted: #5a6380;
-  --text-mid: #8892a4;
-  --border: rgba(61,127,255,0.15);
-  --border2: rgba(61,127,255,0.08);
-  --blue-dim: rgba(61,127,255,0.1);
-  --blue-glow: rgba(61,127,255,0.3);
-  --cyan-dim: rgba(0,212,255,0.1);
-  --r: 14px;
-  --r-sm: 10px;
-  --mono: 'IBM Plex Mono', monospace;
-  --display: 'Syne', sans-serif;
-  --body: 'Outfit', sans-serif;
-}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100dvh;overflow:hidden;display:flex;justify-content:center;align-items:center;}
+  :root {
+    --blue-dark: #0D47A1;
+    --blue-primary: #1565C0;
+    --blue-medium: #1976D2;
+    --blue-light: #42A5F5;
+    --blue-soft: #E3F2FD;
+    --blue-xsoft: #EEF5FF;
+    --green-accent: #2E7D32;
+    --green-light: #E8F5E9;
+    --green-neon: #00E676;
+    --white: #FFFFFF;
+    --gray-100: #F8FAFF;
+    --gray-200: #EEF2F7;
+    --gray-400: #90A4AE;
+    --gray-600: #546E7A;
+    --text-dark: #0D1B2A;
+    --text-mid: #37474F;
+    --shadow-sm: 0 2px 8px rgba(21,101,192,0.10);
+    --shadow-md: 0 4px 20px rgba(21,101,192,0.15);
+    --shadow-lg: 0 8px 40px rgba(21,101,192,0.18);
+    --radius: 18px;
+    --radius-sm: 10px;
+  }
 
-/* ── SHELL ── */
-.shell{width:100%;max-width:430px;height:100dvh;max-height:932px;background:var(--bg);position:relative;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 0 120px rgba(61,127,255,0.07),0 0 40px rgba(0,0,0,0.8);}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* ── STATUS BAR ── */
-.sbar{display:flex;justify-content:space-between;align-items:center;padding:10px 20px 6px;font-family:var(--mono);font-size:11px;color:var(--text-muted);flex-shrink:0;z-index:200;}
-.sbar-right{display:flex;gap:8px;align-items:center;}
-.sig{display:flex;gap:2px;align-items:flex-end;}
-.sig-b{width:3px;border-radius:1px;background:var(--blue);}
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--blue-xsoft);
+    min-height: 100vh;
+    color: var(--text-dark);
+  }
 
-/* ── SCREENS ── */
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity 0.4s ease;z-index:1;}
-.screen.active{opacity:1;pointer-events:all;z-index:10;}
+  /* ── DEMO BAR ── */
+  .demo-bar {
+    background: #0D1B2A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 16px;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    font-size: 11px;
+    color: #90A4AE;
+  }
+  .demo-bar span { color: #42A5F5; font-weight: 700; letter-spacing: 1.5px; font-size: 10px; margin-right: 8px; }
+  .demo-btn {
+    background: transparent;
+    border: 1px solid #263238;
+    color: #90A4AE;
+    padding: 3px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 10px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: all .2s;
+  }
+  .demo-btn:hover, .demo-btn.active {
+    background: var(--blue-primary);
+    border-color: var(--blue-primary);
+    color: white;
+  }
 
-/* ── NAV BAR (bottom) ── */
-.navbar{display:flex;background:var(--bg2);border-top:1px solid var(--border2);flex-shrink:0;z-index:100;position:relative;}
-.nb-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;cursor:pointer;gap:4px;transition:all 0.2s;position:relative;}
-.nb-icon{font-size:20px;transition:transform 0.2s;}
-.nb-label{font-size:9px;font-family:var(--mono);color:var(--text-muted);transition:color 0.2s;letter-spacing:0.5px;text-transform:uppercase;}
-.nb-item.active .nb-label{color:var(--blue);}
-.nb-item.active .nb-icon{transform:scale(1.15);}
-.nb-indicator{position:absolute;top:0;left:50%;transform:translateX(-50%);height:2px;width:28px;background:var(--blue);border-radius:0 0 2px 2px;opacity:0;transition:opacity 0.2s;box-shadow:0 0 8px var(--blue);}
-.nb-item.active .nb-indicator{opacity:1;}
+  /* ── VIEWS ── */
+  .view {
+    display: none !important;
+    padding-top: 36px;
+    min-height: 100vh;
+  }
+  .view.active {
+    display: block !important;
+  }
 
-/* ═══════════════════════════════════
-   SCREEN 1 — DASHBOARD / HOME
-═══════════════════════════════════ */
-#s-home{padding-top:0;}
-.home-header{padding:14px 20px 12px;flex-shrink:0;}
-.home-greeting{font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
-.home-title{font-family:var(--display);font-size:26px;font-weight:800;line-height:1.1;}
-.home-title span{color:var(--blue);}
-.home-sub{font-size:12px;color:var(--text-muted);margin-top:3px;}
+  /* ════════════════════════════════
+     VISTA 1 — CLIENTE
+  ════════════════════════════════ */
+  #view-cliente {
+    background: linear-gradient(160deg, #E3F2FD 0%, #EEF5FF 100%);
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 36px;
+  }
+  #view-cliente.active { display: flex !important; }
 
-/* Hero metrics */
-.metrics-hero{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px;margin-bottom:14px;}
-.metric-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:16px;position:relative;overflow:hidden;}
-.metric-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--blue-dim),transparent);opacity:0.6;}
-.metric-card.wide{grid-column:1/-1;display:flex;gap:16px;}
-.mc-icon{font-size:22px;margin-bottom:8px;}
-.mc-val{font-family:var(--display);font-size:28px;font-weight:800;color:var(--blue);line-height:1;}
-.mc-val.green{color:var(--green);}
-.mc-val.amber{color:var(--amber);}
-.mc-val.red{color:var(--red);}
-.mc-lbl{font-size:11px;color:var(--text-muted);margin-top:4px;font-family:var(--mono);}
-.mc-trend{font-family:var(--mono);font-size:10px;color:var(--green);position:absolute;top:12px;right:12px;}
+  .phone-shell {
+    width: 390px;
+    min-height: calc(100vh - 36px);
+    background: white;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
 
-/* Recent services */
-.section-header{display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin-bottom:10px;}
-.section-title{font-family:var(--display);font-size:14px;font-weight:700;}
-.section-action{font-family:var(--mono);font-size:10px;color:var(--blue);cursor:pointer;}
+  /* App header */
+  .app-header {
+    background: var(--blue-primary);
+    padding: 16px 20px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+  }
+  .app-header .logo-mark {
+    width: 34px; height: 34px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .app-header .app-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; }
+  .app-header .app-sub { font-size: 11px; opacity: .75; margin-top: -2px; }
+  .app-header .header-right { margin-left: auto; display: flex; gap: 14px; font-size: 18px; opacity: .85; }
 
-.services-list{flex:1;overflow-y:auto;padding:0 20px 8px;}
-.services-list::-webkit-scrollbar{width:0;}
+  /* AI badge */
+  .ai-badge {
+    background: linear-gradient(90deg, #1565C0, #1976D2);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 7px 16px;
+    display: flex; align-items: center; gap: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .ai-badge .dot { width: 7px; height: 7px; background: var(--green-neon); border-radius: 50%; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
 
-.svc-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:14px;margin-bottom:10px;position:relative;overflow:hidden;cursor:pointer;transition:border-color 0.2s,transform 0.15s;}
-.svc-card:active{transform:scale(0.98);}
-.svc-card:hover{border-color:var(--border);}
-.svc-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
-.svc-id{font-family:var(--mono);font-size:11px;color:var(--text-muted);}
-.svc-badge{font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:20px;font-weight:600;}
-.svc-badge.transit{background:rgba(61,127,255,0.15);color:var(--blue);border:1px solid rgba(61,127,255,0.3);}
-.svc-badge.pending{background:rgba(245,158,11,0.15);color:var(--amber);border:1px solid rgba(245,158,11,0.3);}
-.svc-badge.done{background:rgba(16,185,129,0.15);color:var(--green);border:1px solid rgba(16,185,129,0.3);}
-.svc-route{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
-.svc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.svc-dot.origin{background:var(--blue);}
-.svc-dot.dest{background:var(--green);}
-.svc-line{flex:1;height:1px;background:var(--border);position:relative;}
-.svc-line::after{content:'›';position:absolute;top:-8px;right:-2px;color:var(--text-muted);font-size:12px;}
-.svc-addr{font-size:12px;color:var(--text);font-weight:500;}
-.svc-addr.muted{color:var(--text-muted);font-size:11px;}
-.svc-bottom{display:flex;justify-content:space-between;align-items:center;}
-.svc-messenger{display:flex;align-items:center;gap:6px;}
-.svc-avatar{width:24px;height:24px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:13px;border:1px solid var(--border);}
-.svc-mname{font-size:11px;color:var(--text-muted);}
-.svc-val{font-family:var(--mono);font-size:13px;color:var(--green);font-weight:600;}
+  /* Chat list */
+  .chat-list { flex: 1; overflow-y: auto; background: var(--gray-100); }
+  .chat-list-header { padding: 14px 16px 8px; font-size: 12px; font-weight: 700; color: var(--gray-600); letter-spacing: .8px; text-transform: uppercase; }
 
-/* Pulse dot on transit */
-.pulse-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--blue);animation:pulse 1.5s ease infinite;margin-right:4px;}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(61,127,255,0.5)}50%{box-shadow:0 0 0 6px transparent}}
+  .chat-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 16px;
+    background: white;
+    border-bottom: 1px solid var(--gray-200);
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .chat-item:hover { background: var(--blue-soft); }
+  .chat-item.selected { background: var(--blue-soft); border-left: 3px solid var(--blue-primary); }
 
-/* ═══════════════════════════════════
-   SCREEN 2 — NUEVO SERVICIO
-═══════════════════════════════════ */
-#s-new{display:flex;flex-direction:column;}
-.form-header{padding:14px 20px 12px;flex-shrink:0;}
-.form-scroll{flex:1;overflow-y:auto;padding:0 20px;padding-bottom:16px;}
-.form-scroll::-webkit-scrollbar{width:0;}
+  .company-avatar {
+    width: 46px; height: 46px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .company-avatar .online-dot {
+    position: absolute; bottom: 1px; right: 1px;
+    width: 10px; height: 10px;
+    background: #4CAF50; border-radius: 50%;
+    border: 2px solid white;
+  }
+  .chat-info { flex: 1; min-width: 0; }
+  .chat-name { font-weight: 700; font-size: 14px; color: var(--text-dark); }
+  .chat-preview { font-size: 12px; color: var(--gray-600); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chat-meta { text-align: right; }
+  .chat-time { font-size: 11px; color: var(--gray-400); }
+  .chat-badge { background: var(--blue-primary); color: white; font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: 4px; margin-left: auto; }
 
-.form-section{margin-bottom:20px;}
-.form-section-label{font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
-.form-section-label::after{content:'';flex:1;height:1px;background:var(--border2);}
+  /* ── CHAT WINDOW ── */
+  #chat-window {
+    display: none;
+    flex-direction: column;
+    height: calc(100vh - 36px);
+    background: white;
+  }
+  #chat-window.open { display: flex; }
 
-.field{margin-bottom:12px;}
-.field label{display:block;font-size:11px;color:var(--text-muted);margin-bottom:6px;font-family:var(--mono);}
-.field input,.field select,.field textarea{
-  width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);
-  color:var(--text);font-family:var(--body);font-size:14px;padding:12px 14px;
-  outline:none;transition:border-color 0.2s,box-shadow 0.2s;
-  -webkit-appearance:none;
-}
-.field input:focus,.field select:focus,.field textarea:focus{
-  border-color:var(--blue);box-shadow:0 0 0 3px rgba(61,127,255,0.1);
-}
-.field input::placeholder{color:var(--text-muted);}
-.field textarea{resize:none;height:70px;}
-.field select option{background:var(--bg3);}
+  .chat-header {
+    background: var(--blue-primary);
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px;
+    color: white;
+  }
+  .chat-header .back-btn { cursor: pointer; font-size: 18px; opacity: .85; }
+  .chat-header .ch-avatar { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; background: rgba(255,255,255,0.2); }
+  .chat-header .ch-name { font-weight: 700; font-size: 15px; }
+  .chat-header .ch-status { font-size: 11px; opacity: .75; }
+  .chat-header .ch-right { margin-left: auto; display: flex; gap: 14px; font-size: 17px; opacity: .8; }
 
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background: var(--blue-xsoft);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 
-.location-field{position:relative;}
-.location-field input{padding-right:44px;}
-.loc-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--blue-dim);border:none;border-radius:6px;color:var(--blue);padding:6px 8px;cursor:pointer;font-size:14px;}
+  .msg { max-width: 78%; display: flex; flex-direction: column; gap: 2px; }
+  .msg.bot { align-self: flex-start; }
+  .msg.user { align-self: flex-end; }
+  .msg-bubble {
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    box-shadow: var(--shadow-sm);
+  }
+  .msg.bot .msg-bubble { background: white; color: var(--text-dark); border-bottom-left-radius: 4px; }
+  .msg.user .msg-bubble { background: var(--blue-primary); color: white; border-bottom-right-radius: 4px; }
+  .msg-time { font-size: 10px; color: var(--gray-400); }
+  .msg.user .msg-time { text-align: right; }
 
-.btn-ai-suggest{width:100%;padding:14px;background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(61,127,255,0.2));border:1px solid rgba(139,92,246,0.4);border-radius:var(--r);color:var(--text);font-family:var(--body);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;margin-bottom:14px;}
-.btn-ai-suggest:hover{background:linear-gradient(135deg,rgba(139,92,246,0.3),rgba(61,127,255,0.3));}
+  .ai-typing {
+    display: none;
+    align-self: flex-start;
+    background: white;
+    border-radius: 16px;
+    border-bottom-left-radius: 4px;
+    padding: 10px 16px;
+    box-shadow: var(--shadow-sm);
+    align-items: center; gap: 4px;
+  }
+  .ai-typing.show { display: flex; }
+  .typing-dot { width: 6px; height: 6px; background: var(--blue-light); border-radius: 50%; animation: tdot .8s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: .15s; }
+  .typing-dot:nth-child(3) { animation-delay: .3s; }
+  @keyframes tdot { 0%,80%,100%{transform:scale(1);opacity:.5} 40%{transform:scale(1.3);opacity:1} }
 
-.ai-suggestion-box{background:var(--bg3);border:1px solid rgba(139,92,246,0.4);border-radius:var(--r);padding:16px;margin-bottom:16px;display:none;}
-.ai-suggestion-box.show{display:block;animation:fadeSlide 0.4s ease;}
-@keyframes fadeSlide{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-.ai-title{font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
-.ai-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border2);}
-.ai-row:last-child{border-bottom:none;padding-bottom:0;}
-.ai-row-label{font-size:12px;color:var(--text-muted);}
-.ai-row-val{font-family:var(--mono);font-size:13px;color:var(--text);font-weight:600;}
-.ai-row-val.highlight{color:var(--purple);}
-.ai-confidence{display:flex;align-items:center;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border2);}
-.ai-conf-bar{flex:1;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;}
-.ai-conf-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--blue));border-radius:2px;width:91%;}
-.ai-conf-label{font-family:var(--mono);font-size:10px;color:var(--purple);}
+  /* Order form card */
+  .order-card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: 16px;
+    border: 1.5px solid var(--blue-soft);
+    display: none;
+  }
+  .order-card.show { display: block; }
+  .order-card h4 { font-family: 'Syne', sans-serif; font-size: 14px; color: var(--blue-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .order-field { margin-bottom: 10px; }
+  .order-field label { font-size: 11px; font-weight: 600; color: var(--gray-600); margin-bottom: 4px; display: block; text-transform: uppercase; letter-spacing: .5px; }
+  .order-field input {
+    width: 100%; padding: 9px 12px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif;
+    outline: none; transition: border .2s;
+    color: var(--text-dark);
+  }
+  .order-field input:focus { border-color: var(--blue-primary); }
+  .btn-confirm {
+    width: 100%; padding: 11px;
+    background: var(--blue-primary);
+    color: white; border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700; font-size: 14px;
+    cursor: pointer; transition: background .2s;
+    margin-top: 4px;
+  }
+  .btn-confirm:hover { background: var(--blue-dark); }
 
-.btn-create{width:100%;padding:16px;background:var(--blue);border:none;border-radius:var(--r);color:#fff;font-family:var(--display);font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 0 24px var(--blue-glow);transition:all 0.2s;position:relative;overflow:hidden;}
-.btn-create::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,0.1),transparent);transform:translateX(-100%);animation:shimmer 3s ease infinite 2s;}
-@keyframes shimmer{0%{transform:translateX(-100%)}40%,100%{transform:translateX(100%)}}
-.btn-create:active{transform:scale(0.98);}
+  /* Chat input bar */
+  .chat-input-bar {
+    padding: 10px 12px;
+    background: white;
+    border-top: 1px solid var(--gray-200);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .input-wrap { flex: 1; display: flex; align-items: center; gap: 8px; background: var(--gray-100); border-radius: 24px; padding: 8px 14px; }
+  .input-wrap input {
+    flex: 1; border: none; background: transparent;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px;
+    outline: none; color: var(--text-dark);
+  }
+  .btn-order-trigger {
+    background: var(--blue-soft); color: var(--blue-primary);
+    border: 1.5px solid var(--blue-light); border-radius: 20px;
+    padding: 7px 13px; font-size: 12px; font-weight: 700;
+    cursor: pointer; white-space: nowrap;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: all .2s;
+  }
+  .btn-order-trigger:hover { background: var(--blue-primary); color: white; border-color: var(--blue-primary); }
+  .btn-send {
+    width: 38px; height: 38px;
+    background: var(--blue-primary); color: white;
+    border: none; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 15px; transition: background .2s;
+    flex-shrink: 0;
+  }
+  .btn-send:hover { background: var(--blue-dark); }
 
-/* ═══════════════════════════════════
-   SCREEN 3 — MAPA
-═══════════════════════════════════ */
-#s-map{display:flex;flex-direction:column;}
-.map-header{padding:14px 20px 10px;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;}
-.map-filter-row{display:flex;gap:6px;padding:0 20px 10px;flex-shrink:0;overflow-x:auto;}
-.map-filter-row::-webkit-scrollbar{height:0;}
-.filter-chip{font-family:var(--mono);font-size:10px;padding:6px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--bg2);color:var(--text-muted);cursor:pointer;white-space:nowrap;transition:all 0.2s;flex-shrink:0;}
-.filter-chip.active{background:var(--blue-dim);border-color:var(--blue);color:var(--blue);}
+  /* ════════════════════════════════
+     VISTA 2 — OPERADOR (DESKTOP)
+  ════════════════════════════════ */
+  #view-operador {
+    background: #F0F4FF;
+    min-height: calc(100vh - 36px);
+  }
 
-.map-wrap{flex:1;position:relative;overflow:hidden;margin:0 16px;border-radius:var(--r);border:1px solid var(--border2);}
-#mapCanvas{width:100%;height:100%;display:block;cursor:pointer;}
-.map-legend{position:absolute;top:10px;right:10px;background:rgba(8,9,15,0.85);backdrop-filter:blur(8px);border:1px solid var(--border2);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:5px;}
-.legend-item{display:flex;align-items:center;gap:6px;font-size:10px;font-family:var(--mono);color:var(--text-muted);}
-.legend-dot{width:8px;height:8px;border-radius:50%;}
+  .op-topbar {
+    background: var(--blue-primary);
+    padding: 0 32px;
+    display: flex; align-items: center; gap: 16px;
+    height: 60px;
+    box-shadow: 0 2px 12px rgba(13,71,161,.3);
+  }
+  .op-topbar .logo { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: white; }
+  .op-topbar .logo span { color: var(--blue-light); }
+  .op-topbar .op-role { background: rgba(255,255,255,0.15); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .op-topbar .ai-live { margin-left: auto; display: flex; align-items: center; gap: 6px; color: white; font-size: 12px; }
+  .op-topbar .ai-live .dot { width: 8px; height: 8px; background: var(--green-neon); border-radius: 50%; animation: pulse 1.5s infinite; }
 
-.map-active-card{position:absolute;bottom:12px;left:12px;right:12px;background:rgba(8,9,15,0.92);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:none;}
-.map-active-card.show{display:block;animation:slideUp 0.3s ease;}
-@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.mac-top{display:flex;justify-content:space-between;margin-bottom:8px;}
-.mac-id{font-family:var(--mono);font-size:11px;color:var(--blue);}
-.mac-close{color:var(--text-muted);cursor:pointer;font-size:16px;background:none;border:none;color:var(--text-muted);}
-.mac-route{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
-.mac-point{display:flex;align-items:center;gap:8px;font-size:12px;}
-.mac-point-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.mac-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.mac-metric{text-align:center;background:var(--bg3);border-radius:8px;padding:8px 4px;}
-.mac-mv{font-family:var(--mono);font-size:13px;color:var(--text);display:block;}
-.mac-ml{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+  .op-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; padding: 24px 32px; max-width: 1400px; }
 
-/* ═══════════════════════════════════
-   SCREEN 4 — MENSAJEROS
-═══════════════════════════════════ */
-#s-messengers{display:flex;flex-direction:column;}
-.mess-header{padding:14px 20px 12px;flex-shrink:0;}
-.mess-list{flex:1;overflow-y:auto;padding:0 20px 8px;}
-.mess-list::-webkit-scrollbar{width:0;}
+  /* Column headers */
+  .col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .col-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--text-dark); }
+  .col-sub { font-size: 12px; color: var(--gray-600); margin-top: 2px; }
 
-.mess-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:16px;margin-bottom:10px;cursor:pointer;transition:all 0.2s;}
-.mess-card:hover{border-color:var(--border);}
-.mess-card-top{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
-.mess-avatar{width:44px;height:44px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid var(--border);flex-shrink:0;position:relative;}
-.mess-status-ring{position:absolute;bottom:0;right:0;width:12px;height:12px;border-radius:50%;border:2px solid var(--bg2);}
-.mess-status-ring.online{background:var(--green);}
-.mess-status-ring.busy{background:var(--amber);}
-.mess-status-ring.offline{background:var(--text-muted);}
-.mess-info{flex:1;}
-.mess-name{font-family:var(--display);font-size:16px;font-weight:700;}
-.mess-meta{font-size:11px;color:var(--text-muted);margin-top:2px;}
-.mess-assign-btn{background:var(--blue-dim);border:1px solid var(--border);border-radius:8px;color:var(--blue);font-size:11px;padding:6px 12px;cursor:pointer;font-family:var(--mono);transition:all 0.2s;white-space:nowrap;}
-.mess-assign-btn:hover{background:rgba(61,127,255,0.2);}
-.mess-assign-btn.assigned{background:rgba(16,185,129,0.15);border-color:rgba(16,185,129,0.3);color:var(--green);}
+  /* Toggle auto */
+  .toggle-wrap { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text-mid); }
+  .toggle {
+    width: 44px; height: 24px;
+    background: var(--gray-200);
+    border-radius: 12px;
+    cursor: pointer;
+    position: relative;
+    transition: background .2s;
+  }
+  .toggle.on { background: #4CAF50; }
+  .toggle::after {
+    content: '';
+    position: absolute; top: 3px; left: 3px;
+    width: 18px; height: 18px;
+    background: white; border-radius: 50%;
+    transition: left .2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,.2);
+  }
+  .toggle.on::after { left: 23px; }
 
-.mess-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
-.mess-stat{background:var(--bg3);border-radius:8px;padding:8px 4px;text-align:center;}
-.mess-sv{font-family:var(--mono);font-size:13px;color:var(--text);display:block;}
-.mess-sl{font-size:9px;color:var(--text-muted);text-transform:uppercase;}
+  /* Service cards operator */
+  .cards-grid { display: flex; flex-direction: column; gap: 14px; }
 
-.mess-route-preview{margin-top:10px;padding-top:10px;border-top:1px solid var(--border2);display:flex;align-items:center;gap:6px;}
-.mrp-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);animation:pulse 1.5s ease infinite;}
-.mrp-text{font-size:11px;color:var(--text-muted);}
+  .srv-card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 18px 20px;
+    border-left: 4px solid var(--blue-primary);
+    transition: box-shadow .2s;
+  }
+  .srv-card:hover { box-shadow: var(--shadow-md); }
+  .srv-card.new-card { border-left-color: #4CAF50; animation: slideIn .4s ease; }
+  .srv-card.postulated { border-left-color: var(--blue-light); opacity: .75; }
+  @keyframes slideIn { from{transform:translateY(-10px);opacity:0} to{transform:translateY(0);opacity:1} }
 
-/* AI Badge on messenger */
-.ai-pick-badge{display:flex;align-items:center;gap:4px;background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(61,127,255,0.15));border:1px solid rgba(139,92,246,0.3);border-radius:20px;padding:3px 8px;font-family:var(--mono);font-size:9px;color:var(--purple);margin-top:6px;width:fit-content;}
+  .srv-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+  .srv-card-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--text-dark); }
+  .srv-card-code { font-size: 11px; color: var(--gray-600); margin-top: 2px; }
+  .status-badge {
+    font-size: 11px; font-weight: 700; padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .badge-new { background: var(--green-light); color: var(--green-accent); }
+  .badge-pending { background: #FFF8E1; color: #F57F17; }
+  .badge-posted { background: var(--blue-soft); color: var(--blue-primary); }
 
-/* ── COMMON TOPBAR ── */
-.topbar2{padding:14px 20px 10px;flex-shrink:0;display:flex;align-items:center;gap:12px;}
-.btn-back2{width:34px;height:34px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);font-size:16px;flex-shrink:0;}
-.topbar2-title{font-family:var(--display);font-size:18px;font-weight:800;flex:1;}
+  .srv-card-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-mid); margin-bottom: 6px; }
+  .srv-card-row i { color: var(--blue-primary); width: 16px; }
 
-/* ── TOAST ── */
-.toast{position:absolute;top:70px;left:50%;transform:translateX(-50%) translateY(-16px);background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:13px;color:var(--text);opacity:0;transition:all 0.4s ease;z-index:999;white-space:nowrap;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,0.5),0 0 20px var(--blue-glow);}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .srv-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--gray-200); }
+  .srv-value { font-weight: 800; font-size: 16px; color: var(--blue-primary); }
 
-/* ── Modal overlay ── */
-.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:500;display:none;align-items:flex-end;}
-.modal-overlay.show{display:flex;animation:fadeIn 0.2s ease;}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.modal-sheet{width:100%;background:var(--bg2);border-radius:24px 24px 0 0;border:1px solid var(--border);border-bottom:none;padding:20px;animation:slideUp2 0.3s ease;}
-@keyframes slideUp2{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px;}
-.modal-title{font-family:var(--display);font-size:20px;font-weight:800;margin-bottom:6px;}
-.modal-sub{font-size:13px;color:var(--text-muted);margin-bottom:20px;}
+  .btn-postular {
+    background: var(--blue-primary); color: white;
+    border: none; border-radius: var(--radius-sm);
+    padding: 9px 18px; font-size: 13px; font-weight: 700;
+    cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+    display: flex; align-items: center; gap: 6px;
+    transition: background .2s;
+  }
+  .btn-postular:hover { background: var(--blue-dark); }
+  .btn-postular:disabled { background: #90CAF9; cursor: default; }
 
-.btn-modal-primary{width:100%;padding:16px;background:var(--blue);border:none;border-radius:var(--r);color:#fff;font-family:var(--display);font-size:16px;font-weight:700;cursor:pointer;margin-bottom:10px;box-shadow:0 0 24px var(--blue-glow);}
-.btn-modal-secondary{width:100%;padding:14px;background:transparent;border:1px solid var(--border2);border-radius:var(--r);color:var(--text-muted);font-family:var(--body);font-size:14px;cursor:pointer;}
+  /* AI Panel (right col) */
+  .ai-panel {
+    display: flex; flex-direction: column; gap: 20px;
+  }
 
-/* ── Scrollbar global ── */
-::-webkit-scrollbar{width:0;}
+  .panel-card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+  }
+  .panel-card-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .panel-card-title i { color: var(--blue-primary); }
+
+  .whatsapp-area {
+    width: 100%;
+    min-height: 90px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 12.5px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    resize: none; outline: none; color: var(--text-dark);
+    transition: border .2s;
+  }
+  .whatsapp-area:focus { border-color: var(--blue-primary); }
+
+  .btn-process-ai {
+    width: 100%; padding: 10px;
+    background: linear-gradient(90deg, var(--blue-primary), var(--blue-medium));
+    color: white; border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700; font-size: 13px;
+    cursor: pointer; margin-top: 10px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: opacity .2s;
+  }
+  .btn-process-ai:hover { opacity: .9; }
+
+  /* AI animation overlay */
+  .ai-processing {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(255,255,255,0.95);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    margin-top: 10px;
+  }
+  .ai-processing.show { display: flex; }
+  .ai-spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--blue-soft);
+    border-top-color: var(--blue-primary);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .ai-processing p { font-size: 12px; color: var(--blue-primary); font-weight: 600; }
+
+  /* Stats in panel */
+  .stats-row { display: flex; gap: 10px; }
+  .stat-box { flex: 1; background: var(--blue-xsoft); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
+  .stat-num { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--blue-primary); }
+  .stat-label { font-size: 10px; color: var(--gray-600); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+
+  /* Route animation */
+  .route-anim {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px;
+    background: var(--blue-xsoft);
+    border-radius: var(--radius-sm);
+    margin-top: 10px;
+  }
+  .route-anim.show { display: flex; }
+  .route-step { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-mid); }
+  .route-step i { color: var(--blue-primary); width: 14px; }
+  .route-step.done { color: var(--green-accent); font-weight: 600; }
+  .route-step.done i { color: var(--green-accent); }
+
+  /* ════════════════════════════════
+     VISTA 3 — CONDUCTOR
+  ════════════════════════════════ */
+  #view-conductor {
+    background: linear-gradient(160deg, #E3F2FD 0%, #EEF5FF 100%);
+    flex-direction: column;
+    align-items: center;
+    padding-top: 36px;
+  }
+  #view-conductor.active { display: flex !important; }
+
+  /* Map simulation */
+  .map-container {
+    width: 100%;
+    height: 200px;
+    background: #D0E8FF;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .map-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(21,101,192,.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(21,101,192,.08) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+  .map-road-h {
+    position: absolute;
+    height: 8px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 4px;
+  }
+  .map-road-v {
+    position: absolute;
+    width: 8px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 4px;
+  }
+  .map-pin {
+    position: absolute;
+    width: 28px; height: 28px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,.2);
+  }
+  .map-pin i { transform: rotate(45deg); font-size: 12px; color: white; }
+  .map-pin.origin { background: var(--blue-primary); top: 60px; left: 60px; }
+  .map-pin.dest { background: #E53935; top: 100px; left: 260px; }
+  .map-route-line {
+    position: absolute;
+    top: 74px; left: 74px;
+    width: 200px; height: 2px;
+    background: linear-gradient(90deg, var(--blue-primary), #E53935);
+    transform-origin: left center;
+    transform: rotate(10deg);
+  }
+  .map-overlay { position: absolute; bottom: 10px; right: 10px; background: rgba(255,255,255,.9); border-radius: var(--radius-sm); padding: 6px 12px; font-size: 11px; font-weight: 700; color: var(--blue-primary); box-shadow: var(--shadow-sm); }
+
+  /* Driver bottom nav */
+  .driver-bottom-nav {
+    display: flex;
+    background: white;
+    border-top: 1px solid var(--gray-200);
+    padding: 10px 0 6px;
+    flex-shrink: 0;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    cursor: pointer; padding: 4px 0;
+  }
+  .nav-item i { font-size: 20px; color: var(--gray-400); transition: color .2s; }
+  .nav-item span { font-size: 10px; color: var(--gray-400); font-weight: 600; transition: color .2s; }
+  .nav-item.active i { color: var(--blue-primary); }
+  .nav-item.active span { color: var(--blue-primary); }
+
+  /* Driver content */
+  .driver-content { flex: 1; overflow-y: auto; background: var(--gray-100); }
+  .driver-section { padding: 14px 16px 6px; font-size: 11px; font-weight: 700; color: var(--gray-600); letter-spacing: .8px; text-transform: uppercase; }
+
+  .driver-card {
+    background: white;
+    border-radius: var(--radius);
+    margin: 8px 12px;
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    border-left: 4px solid var(--blue-primary);
+    transition: box-shadow .2s;
+  }
+  .driver-card.assigned { border-left-color: #4CAF50; }
+  .driver-card:hover { box-shadow: var(--shadow-md); }
+
+  .driver-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .driver-card-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
+  .driver-card-code { font-size: 11px; color: var(--gray-400); }
+
+  .driver-card-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-mid); margin-bottom: 5px; }
+  .driver-card-row i { color: var(--blue-primary); width: 14px; }
+  .driver-card.assigned .driver-card-row i { color: var(--green-accent); }
+
+  .driver-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--gray-200); }
+  .driver-value { font-weight: 800; font-size: 16px; color: var(--blue-primary); }
+
+  .btn-apply {
+    background: var(--blue-primary); color: white;
+    border: none; border-radius: var(--radius-sm);
+    padding: 9px 16px; font-size: 12px; font-weight: 700;
+    cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+    display: flex; align-items: center; gap: 5px;
+    transition: all .2s;
+  }
+  .btn-apply:hover { background: var(--blue-dark); }
+  .btn-applied { background: var(--green-light); color: var(--green-accent); border: 1.5px solid #A5D6A7; border-radius: var(--radius-sm); padding: 9px 16px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+
+  /* Transition notification */
+  .transition-notice {
+    display: none;
+    position: fixed;
+    bottom: 30px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--blue-dark);
+    color: white;
+    padding: 14px 24px;
+    border-radius: 30px;
+    font-size: 13px; font-weight: 700;
+    box-shadow: var(--shadow-lg);
+    z-index: 500;
+    align-items: center; gap: 8px;
+    animation: noticeIn .3s ease;
+  }
+  .transition-notice.show { display: flex; }
+  @keyframes noticeIn { from{transform:translateX(-50%) translateY(20px);opacity:0} to{transform:translateX(-50%) translateY(0);opacity:1} }
+
+  /* ── CONDUCTOR CHIPS (sugeridos) ── */
+  .drivers-row { display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--gray-200); overflow-x: auto; }
+  .driver-chip { flex: 0 0 auto; background: var(--blue-xsoft); border: 1.5px solid var(--blue-soft); border-radius: var(--radius-sm); padding: 8px 10px; text-align: center; cursor: pointer; transition: all .2s; min-width: 90px; }
+  .driver-chip:hover { border-color: var(--blue-primary); background: var(--blue-soft); }
+  .driver-chip.selected { border-color: #4CAF50; background: var(--green-light); }
+  .driver-chip .dc-avatar { font-size: 20px; margin-bottom: 3px; }
+  .driver-chip .dc-name { font-size: 11px; font-weight: 700; color: var(--text-dark); }
+  .driver-chip .dc-stars { font-size: 10px; color: #FFA000; }
+  .driver-chip .dc-dist { font-size: 10px; color: var(--gray-600); margin-top: 2px; }
+
+  /* ── FAB POSTULAR TODOS ── */
+  .fab-postular-all { position: fixed; bottom: 28px; right: 28px; background: linear-gradient(135deg, var(--blue-primary), var(--blue-medium)); color: white; border: none; border-radius: 30px; padding: 13px 20px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 6px 24px rgba(21,101,192,.4); display: none; align-items: center; gap: 8px; z-index: 400; transition: transform .2s, box-shadow .2s; }
+  .fab-postular-all.show { display: flex; }
+  .fab-postular-all:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(21,101,192,.5); }
+  .fab-badge { background: white; color: var(--blue-primary); border-radius: 50%; width: 20px; height: 20px; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+
+  /* ── MODAL POSTULAR TODOS ── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(13,27,42,.6); z-index: 800; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  .modal-overlay.show { display: flex; }
+  .modal-box { background: white; border-radius: var(--radius); padding: 28px; width: 480px; max-width: 92vw; box-shadow: var(--shadow-lg); animation: modalIn .25s ease; }
+  @keyframes modalIn { from{transform:scale(.93);opacity:0} to{transform:scale(1);opacity:1} }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px; }
+  .modal-sub { font-size: 12px; color: var(--gray-600); margin-bottom: 20px; }
+
+  /* Mini map */
+  .mini-map { background: #D0E8FF; border-radius: var(--radius-sm); height: 140px; position: relative; overflow: hidden; margin-bottom: 16px; }
+  .mini-map-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(21,101,192,.07) 1px,transparent 1px), linear-gradient(90deg,rgba(21,101,192,.07) 1px,transparent 1px); background-size: 24px 24px; }
+  .mini-node { position: absolute; width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid white; box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+  .mini-line { position: absolute; height: 2px; background: rgba(21,101,192,.4); transform-origin: left center; border-radius: 2px; opacity: 0; transition: opacity .5s; }
+  .mini-line.lit { opacity: 1; background: var(--blue-primary); }
+
+  /* Progress */
+  .progress-wrap { background: var(--gray-200); border-radius: 6px; height: 8px; overflow: hidden; margin: 14px 0 8px; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--blue-primary), var(--blue-light)); border-radius: 6px; width: 0%; transition: width .5s ease; }
+  .progress-label { font-size: 12px; color: var(--blue-primary); font-weight: 600; min-height: 18px; }
+
+  .modal-done { display: none; text-align: center; padding: 10px 0; }
+  .modal-done .done-icon { font-size: 40px; margin-bottom: 8px; }
+  .modal-done .done-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; color: var(--green-accent); }
+  .modal-done .done-sub { font-size: 12px; color: var(--gray-600); margin-top: 4px; }
+  .btn-close-modal { width: 100%; padding: 11px; background: var(--blue-primary); color: white; border: none; border-radius: var(--radius-sm); font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; margin-top: 16px; transition: background .2s; }
+  .btn-close-modal:hover { background: var(--blue-dark); }
+
+  /* Assigned tag */
+  .card-assigned-tag { display: flex; align-items: center; gap: 6px; background: var(--green-light); border-radius: var(--radius-sm); padding: 7px 12px; font-size: 12px; font-weight: 700; color: var(--green-accent); margin-top: 10px; }
+
+  /* Utility */
+  .hidden { display: none !important; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #B0BEC5; border-radius: 4px; }
 </style>
 </head>
 <body>
-<div class="shell" id="shell">
 
-  <!-- Status bar -->
-  <div class="sbar">
-    <span id="clock" style="font-family:var(--mono);font-size:11px">09:41</span>
-    <div class="sbar-right">
-      <span style="font-size:11px;color:var(--text-muted)">4G</span>
-      <div class="sig">
-        <div class="sig-b" style="height:5px"></div>
-        <div class="sig-b" style="height:8px"></div>
-        <div class="sig-b" style="height:11px"></div>
-        <div class="sig-b" style="height:14px"></div>
-      </div>
-    </div>
-  </div>
+<!-- ═══════════ DEMO BAR ═══════════ -->
+<div class="demo-bar">
+  <span>🎬 DEMO</span>
+  <button class="demo-btn active" onclick="showView('cliente')">📱 Cliente</button>
+  <button class="demo-btn" onclick="showView('operador')">🖥️ Operador</button>
+  <button class="demo-btn" onclick="showView('conductor')">🛵 Conductor</button>
+</div>
 
-  <!-- Toast -->
-  <div class="toast" id="toast"></div>
-
-  <!-- Modal -->
-  <div class="modal-overlay" id="modal" onclick="closeModal(event)">
-    <div class="modal-sheet" id="modal-sheet">
-      <div class="modal-handle"></div>
-      <div class="modal-title" id="modal-title">Confirmar</div>
-      <div class="modal-sub" id="modal-sub">¿Deseas continuar?</div>
-      <button class="btn-modal-primary" id="modal-btn" onclick="">Confirmar</button>
-      <button class="btn-modal-secondary" onclick="document.getElementById('modal').classList.remove('show')">Cancelar</button>
-    </div>
-  </div>
-
-  <!-- ═══ SCREEN 1: HOME / DASHBOARD ═══ -->
-  <div class="screen active" id="s-home">
-    <div class="home-header">
-      <div class="home-greeting">📦 Panel de control</div>
-      <h1 class="home-title">Ant<span>Router</span> AI</h1>
-      <div class="home-sub">Lunes, 28 de abril · Bogotá</div>
-    </div>
-
-    <div class="metrics-hero">
-      <div class="metric-card">
-        <div class="mc-icon">📦</div>
-        <div class="mc-val" id="m-total">8</div>
-        <div class="mc-lbl">SERVICIOS HOY</div>
-        <div class="mc-trend">+3 ↑</div>
-      </div>
-      <div class="metric-card">
-        <div class="mc-icon">🚴</div>
-        <div class="mc-val green" id="m-transit">3</div>
-        <div class="mc-lbl">EN TRÁNSITO</div>
-      </div>
-      <div class="metric-card wide">
-        <div style="flex:1">
-          <div class="mc-icon">✅</div>
-          <div class="mc-val green">5</div>
-          <div class="mc-lbl">ENTREGADOS</div>
+<!-- ═══════════════════════════════════
+     VISTA 1 — CLIENTE
+═══════════════════════════════════ -->
+<div id="view-cliente" class="view active">
+  <div style="display:flex;justify-content:center;">
+    <div class="phone-shell">
+      <!-- App Header -->
+      <div class="app-header">
+        <div class="logo-mark"><i class="fa-solid fa-route"></i></div>
+        <div>
+          <div class="app-title">AntRouter <span style="color:#90CAF9;font-size:14px;">AI</span></div>
+          <div class="app-sub">Mensajería inteligente</div>
         </div>
-        <div style="flex:1">
-          <div class="mc-icon">⏳</div>
-          <div class="mc-val amber">2</div>
-          <div class="mc-lbl">PENDIENTES</div>
-        </div>
-        <div style="flex:1">
-          <div class="mc-icon">💰</div>
-          <div class="mc-val" style="font-size:20px;color:var(--green)">$184k</div>
-          <div class="mc-lbl">RECAUDO</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section-header">
-      <div class="section-title">Servicios recientes</div>
-      <div class="section-action" onclick="switchScreen('new')">+ Nuevo</div>
-    </div>
-
-    <div class="services-list" id="homeServicesList"></div>
-  </div>
-
-  <!-- ═══ SCREEN 2: NUEVO SERVICIO ═══ -->
-  <div class="screen" id="s-new">
-    <div class="topbar2">
-      <div class="btn-back2" onclick="switchScreen('home')">←</div>
-      <div class="topbar2-title">Nuevo Servicio</div>
-    </div>
-
-    <div class="form-scroll">
-      <div class="form-section">
-        <div class="form-section-label">📍 Origen</div>
-        <div class="field location-field">
-          <label>Dirección de recogida</label>
-          <input type="text" id="f-origin" placeholder="Ej: Calle 72 #10-35" value="Calle 72 #10-35, Chapinero">
-          <button class="loc-btn">📌</button>
-        </div>
-        <div class="field">
-          <label>Contacto origen</label>
-          <input type="text" id="f-origin-contact" placeholder="Nombre y teléfono" value="Carlos López · 311 234 5678">
+        <div class="header-right">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <i class="fa-solid fa-ellipsis-vertical"></i>
         </div>
       </div>
 
-      <div class="form-section">
-        <div class="form-section-label">🏁 Destino</div>
-        <div class="field location-field">
-          <label>Dirección de entrega</label>
-          <input type="text" id="f-dest" placeholder="Ej: Av. 68 #25-10" value="Av. El Dorado #68-50, Fontibón">
-          <button class="loc-btn">📌</button>
-        </div>
-        <div class="field">
-          <label>Contacto destino</label>
-          <input type="text" id="f-dest-contact" placeholder="Nombre y teléfono" value="María Torres · 300 987 6543">
-        </div>
+      <!-- AI Badge -->
+      <div class="ai-badge">
+        <div class="dot"></div>
+        Asistente IA activo — listo para atenderte
       </div>
 
-      <div class="form-section">
-        <div class="form-section-label">📋 Detalles del paquete</div>
-        <div class="field-row">
-          <div class="field">
-            <label>Tipo</label>
-            <select id="f-type">
-              <option>📦 Paquete</option>
-              <option>📄 Documento</option>
-              <option>🍱 Alimento</option>
-              <option>💊 Medicamento</option>
-            </select>
+      <!-- Chat List View -->
+      <div id="chat-list-view" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+        <div class="chat-list-header">Empresas disponibles</div>
+        <div class="chat-list" id="chat-list">
+          <div class="chat-item" onclick="openChat('rapidex')">
+            <div class="company-avatar" style="background:#E3F2FD;">🚀<div class="online-dot"></div></div>
+            <div class="chat-info">
+              <div class="chat-name">Rapidex Express</div>
+              <div class="chat-preview">Hola 👋 ¿En qué te puedo ayudar hoy?</div>
+            </div>
+            <div class="chat-meta">
+              <div class="chat-time">ahora</div>
+              <div class="chat-badge">1</div>
+            </div>
           </div>
-          <div class="field">
-            <label>Valor declarado</label>
-            <input type="text" id="f-value" placeholder="$ 0" value="$ 45.000">
+          <div class="chat-item" onclick="openChat('veloz')">
+            <div class="company-avatar" style="background:#E8F5E9;">⚡<div class="online-dot"></div></div>
+            <div class="chat-info">
+              <div class="chat-name">Veloz Delivery</div>
+              <div class="chat-preview">Bienvenido a Veloz, ¿cómo te ayudamos?</div>
+            </div>
+            <div class="chat-meta">
+              <div class="chat-time">2 min</div>
+              <div class="chat-badge">2</div>
+            </div>
+          </div>
+          <div class="chat-item" onclick="openChat('motofast')">
+            <div class="company-avatar" style="background:#FFF3E0;">🛵<div class="online-dot"></div></div>
+            <div class="chat-info">
+              <div class="chat-name">MotoFast Courier</div>
+              <div class="chat-preview">¡Tu pedido es nuestra prioridad!</div>
+            </div>
+            <div class="chat-meta">
+              <div class="chat-time">5 min</div>
+            </div>
           </div>
         </div>
-        <div class="field">
-          <label>Notas adicionales</label>
-          <textarea id="f-notes" placeholder="Instrucciones especiales...">Frágil. Entregar en portería.</textarea>
+      </div>
+
+      <!-- Chat Window -->
+      <div id="chat-window">
+        <div class="chat-header">
+          <span class="back-btn" onclick="closeChat()"><i class="fa-solid fa-arrow-left"></i></span>
+          <div class="ch-avatar" id="ch-avatar">🚀</div>
+          <div>
+            <div class="ch-name" id="ch-name">Rapidex Express</div>
+            <div class="ch-status"><i class="fa-solid fa-circle" style="color:#4CAF50;font-size:8px;"></i> En línea · IA activa</div>
+          </div>
+          <div class="ch-right">
+            <i class="fa-solid fa-phone"></i>
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+          </div>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+          <!-- Messages injected by JS -->
+        </div>
+
+        <!-- Typing indicator -->
+        <div class="ai-typing" id="ai-typing">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+
+        <!-- Order form card -->
+        <div class="order-card" id="order-card" style="margin:0 12px 10px;">
+          <h4><i class="fa-solid fa-box"></i> Solicitar domicilio</h4>
+          <div class="order-field">
+            <label>📍 Dirección de recogida</label>
+            <input type="text" id="inp-origen" placeholder="Ej: Cra 12 #14-30" />
+          </div>
+          <div class="order-field">
+            <label>🏁 Dirección de entrega</label>
+            <input type="text" id="inp-destino" placeholder="Ej: Conjunto Palma Real" />
+          </div>
+          <div class="order-field">
+            <label>📦 Descripción del paquete</label>
+            <input type="text" id="inp-desc" placeholder="Ej: Documentos, caja pequeña..." />
+          </div>
+          <button class="btn-confirm" onclick="confirmOrder()">
+            <i class="fa-solid fa-paper-plane"></i> Confirmar pedido
+          </button>
+        </div>
+
+        <!-- Input bar -->
+        <div class="chat-input-bar">
+          <div class="input-wrap">
+            <input type="text" id="chat-input" placeholder="Escribe un mensaje..." onkeydown="handleChatKey(event)" />
+          </div>
+          <button class="btn-order-trigger" onclick="toggleOrderCard()">
+            <i class="fa-solid fa-box"></i> Pedir
+          </button>
+          <button class="btn-send" onclick="sendUserMsg()"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
       </div>
 
-      <div class="form-section">
-        <div class="form-section-label">🤖 Inteligencia Artificial</div>
-        <button class="btn-ai-suggest" onclick="aiSuggest()">
-          <span>✨</span> Sugerir mensajero y ruta óptima
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     VISTA 2 — OPERADOR
+═══════════════════════════════════ -->
+<div id="view-operador" class="view">
+  <!-- Top bar -->
+  <div class="op-topbar">
+    <div class="logo">Ant<span>Router</span> AI</div>
+    <div class="op-role"><i class="fa-solid fa-headset"></i> Panel Operador</div>
+    <div class="op-topbar" style="margin-left:auto;background:none;height:auto;padding:0;box-shadow:none;">
+      <div class="ai-live">
+        <div class="dot"></div>
+        IA activa · Procesando rutas
+      </div>
+    </div>
+  </div>
+
+  <div class="op-layout">
+    <!-- LEFT: Pedidos -->
+    <div>
+      <div class="col-header">
+        <div>
+          <div class="col-title">Servicios entrantes</div>
+          <div class="col-sub">Pedidos recibidos via app y mensajería</div>
+        </div>
+        <div class="toggle-wrap">
+          Auto-aceptar
+          <div class="toggle on" id="auto-toggle" onclick="toggleAuto()"></div>
+        </div>
+      </div>
+
+      <div class="cards-grid" id="op-cards">
+
+        <!-- Card 1 — viene de la vista cliente -->
+        <div class="srv-card" id="card-cliente" style="display:none;">
+          <div class="srv-card-header">
+            <div>
+              <div class="srv-card-title" id="card-cliente-title">Pedido — Rapidex Express</div>
+              <div class="srv-card-code">SRV-00127 · Vía App cliente</div>
+            </div>
+            <span class="status-badge badge-new">Nuevo ✦ IA</span>
+          </div>
+          <div class="srv-card-row"><i class="fa-solid fa-location-dot"></i> <span id="card-origen">Cra 12 #14-30</span></div>
+          <div class="srv-card-row"><i class="fa-solid fa-flag-checkered"></i> <span id="card-destino">Conjunto Palma Real</span></div>
+          <div class="srv-card-row"><i class="fa-solid fa-box"></i> <span id="card-desc">Documentos</span></div>
+          <div class="srv-card-footer">
+            <div class="srv-value">$13.000</div>
+            <div id="route-anim-1" class="route-anim">
+              <div class="route-step" id="rs1"><i class="fa-solid fa-circle-notch fa-spin"></i> Analizando ruta óptima...</div>
+              <div class="route-step hidden" id="rs2"><i class="fa-solid fa-check-circle"></i> Ruta calculada: 2.3 km</div>
+              <div class="route-step hidden" id="rs3"><i class="fa-solid fa-check-circle"></i> Conductor sugerido: disponible</div>
+              <div class="route-step hidden" id="rs4" style="color:var(--blue-primary);font-weight:700;"><i class="fa-solid fa-check-circle"></i> ¡Servicio postulado! ✓</div>
+            </div>
+            <button class="btn-postular" id="btn-post-1" onclick="postularCard('card-cliente','btn-post-1','route-anim-1')">
+              <i class="fa-solid fa-robot"></i> Postular con IA
+            </button>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="srv-card">
+          <div class="srv-card-header">
+            <div>
+              <div class="srv-card-title">Los Cortijos</div>
+              <div class="srv-card-code">SRV-00125 · Vía App cliente</div>
+            </div>
+            <span class="status-badge badge-new">Nuevo ✦ IA</span>
+          </div>
+          <div class="srv-card-row"><i class="fa-solid fa-location-dot"></i> Calle 16 #9-40</div>
+          <div class="srv-card-row"><i class="fa-solid fa-flag-checkered"></i> Clínica del Cesar</div>
+          <div class="srv-card-row"><i class="fa-solid fa-box"></i> Medicamentos urgentes</div>
+          <div class="srv-card-footer">
+            <div class="srv-value">$15.000</div>
+            <div id="route-anim-2" class="route-anim">
+              <div class="route-step" id="rs2-1"><i class="fa-solid fa-circle-notch fa-spin"></i> Analizando ruta óptima...</div>
+              <div class="route-step hidden" id="rs2-2"><i class="fa-solid fa-check-circle"></i> Ruta calculada: 1.8 km</div>
+              <div class="route-step hidden" id="rs2-3"><i class="fa-solid fa-check-circle"></i> Conductor sugerido: disponible</div>
+              <div class="route-step hidden" id="rs2-4" style="color:var(--blue-primary);font-weight:700;"><i class="fa-solid fa-check-circle"></i> ¡Servicio postulado! ✓</div>
+            </div>
+            <button class="btn-postular" id="btn-post-2" onclick="postularCard(null,'btn-post-2','route-anim-2')">
+              <i class="fa-solid fa-robot"></i> Postular con IA
+            </button>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="srv-card">
+          <div class="srv-card-header">
+            <div>
+              <div class="srv-card-title">Novalito</div>
+              <div class="srv-card-code">SRV-00124 · Vía App cliente</div>
+            </div>
+            <span class="status-badge badge-pending">Esperando</span>
+          </div>
+          <div class="srv-card-row"><i class="fa-solid fa-location-dot"></i> Cra 9 #20-10, Centro</div>
+          <div class="srv-card-row"><i class="fa-solid fa-flag-checkered"></i> Urbanización La Loma</div>
+          <div class="srv-card-row"><i class="fa-solid fa-box"></i> Ropa y calzado</div>
+          <div class="srv-card-footer">
+            <div class="srv-value">$12.000</div>
+            <div id="route-anim-3" class="route-anim">
+              <div class="route-step"><i class="fa-solid fa-circle-notch fa-spin"></i> Analizando ruta óptima...</div>
+              <div class="route-step hidden" id="rs3-2"><i class="fa-solid fa-check-circle"></i> Ruta calculada: 3.1 km</div>
+              <div class="route-step hidden" id="rs3-3"><i class="fa-solid fa-check-circle"></i> Conductor sugerido: disponible</div>
+              <div class="route-step hidden" id="rs3-4" style="color:var(--blue-primary);font-weight:700;"><i class="fa-solid fa-check-circle"></i> ¡Servicio postulado! ✓</div>
+            </div>
+            <button class="btn-postular" id="btn-post-3" onclick="postularCard(null,'btn-post-3','route-anim-3')">
+              <i class="fa-solid fa-robot"></i> Postular con IA
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: AI Panel -->
+    <div class="ai-panel">
+
+      <!-- Stats -->
+      <div class="panel-card">
+        <div class="panel-card-title"><i class="fa-solid fa-chart-line"></i> Hoy en tiempo real</div>
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-num" id="stat-entrantes">3</div>
+            <div class="stat-label">Entrantes</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num" id="stat-postulados">0</div>
+            <div class="stat-label">Postulados</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num">2</div>
+            <div class="stat-label">En curso</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WhatsApp processor -->
+      <div class="panel-card">
+        <div class="panel-card-title"><i class="fa-brands fa-whatsapp" style="color:#25D366;"></i> Procesar desde WhatsApp</div>
+        <p style="font-size:12px;color:var(--gray-600);margin-bottom:10px;">Pega el mensaje del cliente y la IA armará la tarjeta automáticamente.</p>
+        <textarea class="whatsapp-area" id="wa-input" placeholder="Ej: Hola buenas, necesito un domicilio de la Cra 5 #10-20 hasta el Centro Comercial Guatapurí, es una cajita pequeña con documentos. Gracias"></textarea>
+        <div class="ai-processing" id="wa-processing">
+          <div class="ai-spinner"></div>
+          <p>IA procesando mensaje...</p>
+        </div>
+        <button class="btn-process-ai" onclick="processWhatsapp()">
+          <i class="fa-solid fa-robot"></i> Procesar con IA
         </button>
-        <div class="ai-suggestion-box" id="aiBox">
-          <div class="ai-title">🤖 Recomendación IA · confianza 91%</div>
-          <div class="ai-row">
-            <span class="ai-row-label">Mensajero sugerido</span>
-            <span class="ai-row-val highlight">🚴 Diego Ramírez</span>
-          </div>
-          <div class="ai-row">
-            <span class="ai-row-label">Ruta optimizada</span>
-            <span class="ai-row-val">8.4 km · 24 min</span>
-          </div>
-          <div class="ai-row">
-            <span class="ai-row-label">Tiempo estimado</span>
-            <span class="ai-row-val">Llegada 10:32 AM</span>
-          </div>
-          <div class="ai-row">
-            <span class="ai-row-label">Costo flete sugerido</span>
-            <span class="ai-row-val highlight">$ 12.500</span>
-          </div>
-          <div class="ai-confidence">
-            <span class="ai-conf-label">Confianza IA:</span>
-            <div class="ai-conf-bar"><div class="ai-conf-fill"></div></div>
-            <span class="ai-conf-label">91%</span>
-          </div>
+      </div>
+
+      <!-- Go to conductor -->
+      <div class="panel-card" id="go-conductor-panel" style="display:none;">
+        <div class="panel-card-title"><i class="fa-solid fa-check-circle" style="color:#4CAF50;"></i> Servicios postulados</div>
+        <p style="font-size:12px;color:var(--gray-600);margin-bottom:14px;">Los conductores ya pueden ver y postularse a los servicios disponibles.</p>
+        <button class="btn-postular" style="width:100%;justify-content:center;" onclick="showView('conductor')">
+          <i class="fa-solid fa-arrow-right"></i> Ver vista del Conductor
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     VISTA 3 — CONDUCTOR
+═══════════════════════════════════ -->
+<div id="view-conductor" class="view">
+  <div style="display:flex;justify-content:center;">
+    <div class="phone-shell">
+
+      <!-- App Header -->
+      <div class="app-header">
+        <div class="logo-mark"><i class="fa-solid fa-motorcycle"></i></div>
+        <div>
+          <div class="app-title">AntRouter <span style="color:#90CAF9;font-size:14px;">AI</span></div>
+          <div class="app-sub">Panel Conductor</div>
+        </div>
+        <div class="header-right">
+          <i class="fa-solid fa-bell"></i>
+          <i class="fa-solid fa-user-circle"></i>
         </div>
       </div>
 
-      <button class="btn-create" onclick="createService()">
-        Crear Servicio ›
-      </button>
-    </div>
-  </div>
-
-  <!-- ═══ SCREEN 3: MAPA ═══ -->
-  <div class="screen" id="s-map">
-    <div class="map-header">
-      <div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:2px;text-transform:uppercase;">Seguimiento</div>
-        <div style="font-family:var(--display);font-size:20px;font-weight:800;">Mapa en vivo</div>
+      <!-- Map -->
+      <div class="map-container">
+        <div class="map-grid"></div>
+        <div class="map-road-h" style="top:70px;left:0;right:0;"></div>
+        <div class="map-road-h" style="top:110px;left:0;right:0;"></div>
+        <div class="map-road-v" style="left:80px;top:0;bottom:0;"></div>
+        <div class="map-road-v" style="left:200px;top:0;bottom:0;"></div>
+        <div class="map-road-v" style="left:300px;top:0;bottom:0;"></div>
+        <div class="map-route-line"></div>
+        <div class="map-pin origin"><i class="fa-solid fa-location-dot"></i></div>
+        <div class="map-pin dest"><i class="fa-solid fa-flag-checkered"></i></div>
+        <div class="map-overlay"><i class="fa-solid fa-route"></i> 2.3 km · ~8 min</div>
       </div>
-      <div style="font-family:var(--mono);font-size:10px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:var(--green);padding:6px 10px;border-radius:20px;display:flex;align-items:center;gap:4px;">
-        <span style="width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;display:inline-block;"></span>
-        LIVE
-      </div>
-    </div>
 
-    <div class="map-filter-row">
-      <div class="filter-chip active">Todos</div>
-      <div class="filter-chip">En tránsito</div>
-      <div class="filter-chip">Pendientes</div>
-      <div class="filter-chip">Completados</div>
-    </div>
+      <!-- Content -->
+      <div class="driver-content" id="driver-content">
+        <div class="driver-section">Servicios disponibles</div>
 
-    <div class="map-wrap">
-      <canvas id="mapCanvas"></canvas>
-      <div class="map-legend">
-        <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Origen</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Destino</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Mensajero</div>
-      </div>
-      <div class="map-active-card" id="mapCard">
-        <div class="mac-top">
-          <span class="mac-id" id="mac-id">SVC-001</span>
-          <button class="mac-close" onclick="document.getElementById('mapCard').classList.remove('show')">×</button>
-        </div>
-        <div class="mac-route">
-          <div class="mac-point">
-            <div class="mac-point-dot" style="background:var(--blue)"></div>
-            <span id="mac-origin" style="font-size:12px">Calle 72 #10-35</span>
+        <div class="driver-card" id="drv-card-1">
+          <div class="driver-card-header">
+            <div>
+              <div class="driver-card-title" id="drv-title-1">Rapidex Express</div>
+              <div class="driver-card-code" id="drv-code-1">SRV-00127</div>
+            </div>
+            <span class="status-badge badge-new">Entrante</span>
           </div>
-          <div style="padding-left:3px;border-left:2px dashed var(--border2);height:10px;margin-left:3px;"></div>
-          <div class="mac-point">
-            <div class="mac-point-dot" style="background:var(--green)"></div>
-            <span id="mac-dest" style="font-size:12px">Av. El Dorado #68-50</span>
+          <div class="driver-card-row"><i class="fa-solid fa-location-dot"></i> <span id="drv-origen-1">Cra 12 #14-30</span></div>
+          <div class="driver-card-row"><i class="fa-solid fa-flag-checkered"></i> <span id="drv-destino-1">Conjunto Palma Real</span></div>
+          <div class="driver-card-row"><i class="fa-solid fa-box"></i> <span id="drv-desc-1">Documentos</span></div>
+          <div class="driver-card-footer">
+            <div class="driver-value">$13.000</div>
+            <button class="btn-apply" id="apply-btn-1" onclick="applyService(1)">
+              <i class="fa-solid fa-hand-pointer"></i> Postularme
+            </button>
           </div>
         </div>
-        <div class="mac-metrics">
-          <div class="mac-metric">
-            <span class="mac-mv" id="mac-dist">8.4km</span>
-            <span class="mac-ml">Distancia</span>
+
+        <div class="driver-card" id="drv-card-2">
+          <div class="driver-card-header">
+            <div>
+              <div class="driver-card-title">Los Cortijos</div>
+              <div class="driver-card-code">SRV-00125</div>
+            </div>
+            <span class="status-badge badge-new">Entrante</span>
           </div>
-          <div class="mac-metric">
-            <span class="mac-mv" id="mac-eta">24min</span>
-            <span class="mac-ml">ETA</span>
-          </div>
-          <div class="mac-metric">
-            <span class="mac-mv" id="mac-status">🔵</span>
-            <span class="mac-ml">Estado</span>
+          <div class="driver-card-row"><i class="fa-solid fa-location-dot"></i> Calle 16 #9-40</div>
+          <div class="driver-card-row"><i class="fa-solid fa-flag-checkered"></i> Clínica del Cesar</div>
+          <div class="driver-card-row"><i class="fa-solid fa-box"></i> Medicamentos urgentes</div>
+          <div class="driver-card-footer">
+            <div class="driver-value">$15.000</div>
+            <button class="btn-apply" id="apply-btn-2" onclick="applyService(2)">
+              <i class="fa-solid fa-hand-pointer"></i> Postularme
+            </button>
           </div>
         </div>
-      </div>
-    </div>
 
-    <div style="padding:12px 16px 8px;flex-shrink:0;font-family:var(--mono);font-size:10px;color:var(--text-muted);display:flex;justify-content:space-between;">
-      <span>Toca un punto para ver detalles</span>
-      <span id="mapCount">3 activos</span>
+        <div class="driver-section" id="assigned-section" style="display:none;">Mis servicios asignados</div>
+        <div id="assigned-cards"></div>
+
+      </div>
+
+      <!-- Bottom Nav -->
+      <div class="driver-bottom-nav">
+        <div class="nav-item active"><i class="fa-solid fa-truck"></i><span>Servicios</span></div>
+        <div class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Historial</span></div>
+        <div class="nav-item"><i class="fa-regular fa-comment"></i><span>Chat</span></div>
+        <div class="nav-item"><i class="fa-solid fa-bars"></i><span>Más</span></div>
+      </div>
+
     </div>
   </div>
+</div>
 
-  <!-- ═══ SCREEN 4: MENSAJEROS ═══ -->
-  <div class="screen" id="s-messengers">
-    <div class="mess-header">
-      <div style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Equipo</div>
-      <div style="font-family:var(--display);font-size:22px;font-weight:800;">Mensajeros</div>
-    </div>
+<!-- ═══════════ FAB POSTULAR TODOS ═══════════ -->
+<button class="fab-postular-all" id="fab-all" onclick="openModalAll()">
+  <i class="fa-solid fa-robot"></i>
+  Postular todos
+  <span class="fab-badge" id="fab-count">3</span>
+</button>
 
-    <div style="padding:0 20px 10px;flex-shrink:0;display:flex;gap:8px;">
-      <div style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;text-align:center;">
-        <div style="font-family:var(--mono);font-size:18px;color:var(--green);">3</div>
-        <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Activos</div>
+<!-- ═══════════ MODAL POSTULAR TODOS ═══════════ -->
+<div class="modal-overlay" id="modal-all">
+  <div class="modal-box">
+    <div id="modal-content">
+      <div class="modal-title">🤖 Postulación masiva con IA</div>
+      <div class="modal-sub">La IA analizará y armará rutas óptimas para todos los servicios pendientes.</div>
+
+      <!-- Mini map con nodos animados -->
+      <div class="mini-map" id="mini-map">
+        <div class="mini-map-grid"></div>
+        <!-- nodos y líneas se inyectan por JS -->
       </div>
-      <div style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;text-align:center;">
-        <div style="font-family:var(--mono);font-size:18px;color:var(--amber);">1</div>
-        <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Ocupados</div>
+
+      <div class="progress-wrap">
+        <div class="progress-bar" id="modal-progress"></div>
       </div>
-      <div style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;text-align:center;">
-        <div style="font-family:var(--mono);font-size:18px;color:var(--text-muted);">1</div>
-        <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Offline</div>
-      </div>
+      <div class="progress-label" id="modal-label">Iniciando análisis de rutas...</div>
     </div>
 
-    <div class="mess-list" id="messengerList"></div>
-  </div>
-
-  <!-- ── BOTTOM NAV ── -->
-  <div class="navbar" id="navbar">
-    <div class="nb-item active" onclick="switchScreen('home')" id="nb-home">
-      <div class="nb-indicator"></div>
-      <div class="nb-icon">🏠</div>
-      <div class="nb-label">Panel</div>
-    </div>
-    <div class="nb-item" onclick="switchScreen('new')" id="nb-new">
-      <div class="nb-indicator"></div>
-      <div class="nb-icon">➕</div>
-      <div class="nb-label">Nuevo</div>
-    </div>
-    <div class="nb-item" onclick="switchScreen('map')" id="nb-map">
-      <div class="nb-indicator"></div>
-      <div class="nb-icon">🗺️</div>
-      <div class="nb-label">Mapa</div>
-    </div>
-    <div class="nb-item" onclick="switchScreen('messengers')" id="nb-messengers">
-      <div class="nb-indicator"></div>
-      <div class="nb-icon">🚴</div>
-      <div class="nb-label">Equipo</div>
+    <div class="modal-done" id="modal-done">
+      <div class="done-icon">✅</div>
+      <div class="done-title">¡Servicios postulados exitosamente!</div>
+      <div class="done-sub" id="done-sub-text">3 servicios optimizados y enviados a conductores disponibles.</div>
+      <button class="btn-close-modal" onclick="closeModalAll()">Ver conductores →</button>
     </div>
   </div>
+</div>
 
+<!-- Transition notice -->
+<div class="transition-notice" id="transition-notice">
+  <i class="fa-solid fa-check-circle"></i>
+  <span id="notice-text">Pasando al siguiente paso...</span>
 </div>
 
 <script>
-// ─── DATA ───────────────────────────────────────────────
-const services = [
-  { id:'SVC-001', origin:'Calle 72 #10-35, Chapinero', dest:'Av. El Dorado #68-50, Fontibón', status:'transit', messenger:'Diego R.', value:'$12.500', dist:'8.4km', eta:'24min', emoji:'🚴' },
-  { id:'SVC-002', origin:'Carrera 15 #85-42, Usaquén', dest:'Calle 26 #92-32, El Salitre', status:'transit', messenger:'Camila V.', value:'$9.800', dist:'6.1km', eta:'18min', emoji:'🛵' },
-  { id:'SVC-003', origin:'Calle 100 #19-61, Norte', dest:'Carrera 30 #45-30, Teusaquillo', status:'pending', messenger:'Sin asignar', value:'$15.200', dist:'7.3km', eta:'--', emoji:'⏳' },
-  { id:'SVC-004', origin:'Av. 68 #25-10, Normandía', dest:'Calle 13 #37-15, Centro', status:'transit', messenger:'Luis M.', value:'$8.000', dist:'4.9km', eta:'12min', emoji:'🚴' },
-  { id:'SVC-005', origin:'Calle 45 #10-25, Palermo', dest:'Carrera 7 #32-16, La Candelaria', status:'done', messenger:'Diego R.', value:'$11.000', dist:'5.2km', eta:'✅', emoji:'✅' },
-  { id:'SVC-006', origin:'Carrera 50 #12-40, Kennedy', dest:'Calle 80 #44-10, Engativá', status:'done', messenger:'Camila V.', value:'$14.500', dist:'9.1km', eta:'✅', emoji:'✅' },
-  { id:'SVC-007', origin:'Calle 127 #15-23, Cedritos', dest:'Av. Boyacá #72-90, Álamos', status:'pending', messenger:'Sin asignar', value:'$18.000', dist:'12.3km', eta:'--', emoji:'⏳' },
-  { id:'SVC-008', origin:'Carrera 9 #70-45, El Nogal', dest:'Calle 53 #103-59, Suba', status:'done', messenger:'Luis M.', value:'$10.200', dist:'6.8km', eta:'✅', emoji:'✅' },
+// ════════════════════════
+//  DEMO BAR NAVIGATION
+// ════════════════════════
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  const idx = {cliente:0,operador:1,conductor:2}[name];
+  document.querySelectorAll('.demo-btn')[idx].classList.add('active');
+  window.scrollTo(0,0);
+  // Show FAB only on operador view
+  const fab = document.getElementById('fab-all');
+  fab.classList.toggle('show', name === 'operador');
+}
+
+function showNotice(text, duration = 2500) {
+  const n = document.getElementById('transition-notice');
+  document.getElementById('notice-text').textContent = text;
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), duration);
+}
+
+// ════════════════════════
+//  VISTA 1 — CHAT
+// ════════════════════════
+const companies = {
+  rapidex: { name: 'Rapidex Express', avatar: '🚀', greeting: '¡Hola! 👋 Soy el asistente IA de Rapidex Express. Estoy listo para ayudarte con tu domicilio. ¿Qué necesitas enviar hoy?' },
+  veloz:   { name: 'Veloz Delivery',   avatar: '⚡', greeting: '¡Bienvenido a Veloz Delivery! 🚀 Soy tu asistente inteligente. Cuéntame, ¿a dónde necesitas tu envío?' },
+  motofast:{ name: 'MotoFast Courier', avatar: '🛵', greeting: '¡Hola! Soy el asistente IA de MotoFast 🛵 Tu pedido es nuestra prioridad. ¿Cómo te puedo ayudar hoy?' }
+};
+
+const aiResponses = [
+  '¡Entendido! Puedo ayudarte con eso. Para continuar, usa el botón <strong>📦 Pedir</strong> y completa los datos de tu domicilio.',
+  'Claro que sí 😊 Puedo procesar tu pedido de inmediato. ¿Usas el formulario de domicilio?',
+  'Perfecto, eso no es problema. Con nuestra IA, tu domicilio será asignado al conductor más cercano en minutos.',
+  '¡Genial! Estamos disponibles todo el día. Presiona <strong>📦 Pedir</strong> para registrar tu solicitud ahora.',
 ];
 
-const messengers = [
-  { id:1, name:'Diego Ramírez', emoji:'🧑', vehicle:'Bicicleta eléctrica', zone:'Centro · Norte', status:'online', services:3, rating:4.9, km:42, time:'3h20m', isAIPick:true },
-  { id:2, name:'Camila Valencia', emoji:'👩', vehicle:'Moto 125cc', zone:'Norte · Usaquén', status:'online', services:4, rating:4.8, km:78, time:'5h10m', isAIPick:false },
-  { id:3, name:'Luis Mendoza', emoji:'🧔', vehicle:'Bicicleta', zone:'Occidente · Sur', status:'busy', services:2, rating:4.7, km:31, time:'2h45m', isAIPick:false },
-  { id:4, name:'Paola Jiménez', emoji:'👩‍🦱', vehicle:'Moto 200cc', zone:'Sur · Kennedy', status:'online', services:1, rating:4.9, km:55, time:'4h00m', isAIPick:false },
-  { id:5, name:'Andrés Castro', emoji:'👨‍🦰', vehicle:'Bicicleta', zone:'—', status:'offline', services:0, rating:4.6, km:0, time:'—', isAIPick:false },
-];
+let currentCompany = null;
+let msgCount = 0;
 
-// ─── CLOCK ──────────────────────────────────────────────
-function updateClock() {
-  const n = new Date();
-  document.getElementById('clock').textContent =
-    String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
-}
-updateClock(); setInterval(updateClock, 60000);
-
-// ─── TOAST ──────────────────────────────────────────────
-function showToast(msg, duration=2500) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), duration);
+function openChat(company) {
+  currentCompany = company;
+  const c = companies[company];
+  document.getElementById('ch-name').textContent = c.name;
+  document.getElementById('ch-avatar').textContent = c.avatar;
+  const msgs = document.getElementById('chat-messages');
+  msgs.innerHTML = '';
+  document.getElementById('order-card').classList.remove('show');
+  document.getElementById('chat-list-view').style.display = 'none';
+  const win = document.getElementById('chat-window');
+  win.classList.add('open');
+  msgCount = 0;
+  setTimeout(() => addMsg('bot', c.greeting), 400);
 }
 
-// ─── NAVIGATION ─────────────────────────────────────────
-const screenMap = { home:'s-home', new:'s-new', map:'s-map', messengers:'s-messengers' };
-let currentScreen = 'home';
-
-function switchScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(screenMap[name]).classList.add('active');
-
-  document.querySelectorAll('.nb-item').forEach(n => n.classList.remove('active'));
-  const nb = document.getElementById('nb-' + name);
-  if (nb) nb.classList.add('active');
-
-  currentScreen = name;
-  if (name === 'home') renderHome();
-  if (name === 'map') initMapCanvas();
-  if (name === 'messengers') renderMessengers();
+function closeChat() {
+  document.getElementById('chat-window').classList.remove('open');
+  document.getElementById('chat-list-view').style.display = 'flex';
+  document.getElementById('order-card').classList.remove('show');
 }
 
-// ─── HOME RENDER ────────────────────────────────────────
-function renderHome() {
-  const list = document.getElementById('homeServicesList');
-  list.innerHTML = '';
-  services.forEach(s => {
-    const statusLabel = s.status === 'transit' ? 'En tránsito' : s.status === 'pending' ? 'Pendiente' : 'Entregado';
-    const div = document.createElement('div');
-    div.className = 'svc-card';
-    div.innerHTML = `
-      <div class="svc-card-top">
-        <span class="svc-id">${s.id}</span>
-        <span class="svc-badge ${s.status}">${s.status==='transit'?'<span class="pulse-dot"></span>':''}${statusLabel}</span>
-      </div>
-      <div class="svc-route">
-        <div class="svc-dot origin"></div>
-        <div class="svc-line"></div>
-        <div class="svc-dot dest"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-        <div>
-          <div class="svc-addr">${s.origin.split(',')[0]}</div>
-          <div class="svc-addr muted">${s.dest.split(',')[0]}</div>
-        </div>
-      </div>
-      <div class="svc-bottom">
-        <div class="svc-messenger">
-          <div class="svc-avatar">${s.emoji}</div>
-          <span class="svc-mname">${s.messenger}</span>
-        </div>
-        <span class="svc-val">${s.value}</span>
-      </div>
-    `;
-    div.onclick = () => {
-      showToast(`📦 ${s.id} · ${statusLabel} · ${s.dist}`);
-    };
-    list.appendChild(div);
-  });
+function addMsg(type, text) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + type;
+  const now = new Date();
+  const time = now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0');
+  div.innerHTML = `<div class="msg-bubble">${text}</div><div class="msg-time">${time}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
 }
-renderHome();
 
-// ─── FORM / AI ───────────────────────────────────────────
-let aiDone = false;
-function aiSuggest() {
-  if (aiDone) { document.getElementById('aiBox').classList.toggle('show'); return; }
-  showToast('🤖 Analizando disponibilidad y tráfico...');
+function showTyping() {
+  document.getElementById('ai-typing').classList.add('show');
+  const msgs = document.getElementById('chat-messages');
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function hideTyping() {
+  document.getElementById('ai-typing').classList.remove('show');
+}
+
+function handleChatKey(e) {
+  if (e.key === 'Enter') sendUserMsg();
+}
+
+function sendUserMsg() {
+  const inp = document.getElementById('chat-input');
+  const text = inp.value.trim();
+  if (!text) return;
+  addMsg('user', text);
+  inp.value = '';
+  showTyping();
+  const resp = aiResponses[msgCount % aiResponses.length];
+  msgCount++;
   setTimeout(() => {
-    document.getElementById('aiBox').classList.add('show');
-    aiDone = true;
-    showToast('✅ IA sugiere: Diego Ramírez · Ruta A · 24 min');
+    hideTyping();
+    addMsg('bot', resp);
+  }, 1200);
+}
+
+function toggleOrderCard() {
+  const card = document.getElementById('order-card');
+  card.classList.toggle('show');
+  const msgs = document.getElementById('chat-messages');
+  msgs.scrollTop = msgs.scrollHeight;
+  if (card.classList.contains('show') && msgCount === 0) {
+    addMsg('bot', '¡Perfecto! Completa el formulario y te asignaremos el conductor más cercano con nuestra IA 🤖');
+    msgCount++;
+  }
+}
+
+function confirmOrder() {
+  const origen  = document.getElementById('inp-origen').value  || 'Cra 12 #14-30';
+  const destino = document.getElementById('inp-destino').value || 'Conjunto Palma Real';
+  const desc    = document.getElementById('inp-desc').value    || 'Documentos';
+  const company = currentCompany || 'rapidex';
+
+  document.getElementById('order-card').classList.remove('show');
+  addMsg('user', `📦 Pedido: ${origen} → ${destino} (${desc})`);
+  showTyping();
+
+  // Save to operator card
+  const cname = companies[company].name;
+  setTimeout(() => {
+    hideTyping();
+    addMsg('bot', `✅ ¡Pedido recibido! Nuestra IA está buscando el conductor ideal para tu domicilio. Te notificaremos pronto 🚀`);
+    // Update operator card
+    document.getElementById('card-cliente-title').textContent = 'Pedido — ' + cname;
+    document.getElementById('card-origen').textContent = origen;
+    document.getElementById('card-destino').textContent = destino;
+    document.getElementById('card-desc').textContent = desc;
+    document.getElementById('card-cliente').style.display = 'block';
+    // Update driver card
+    document.getElementById('drv-title-1').textContent = cname;
+    document.getElementById('drv-origen-1').textContent = origen;
+    document.getElementById('drv-destino-1').textContent = destino;
+    document.getElementById('drv-desc-1').textContent = desc;
+
+    setTimeout(() => {
+      addMsg('bot', '¡Listo! Tu solicitud ha sido enviada al operador. En breve recibirás confirmación 📲');
+      setTimeout(() => {
+        showNotice('✅ Pedido enviado al Operador');
+        setTimeout(() => showView('operador'), 2200);
+      }, 1200);
+    }, 1000);
+  }, 1500);
+}
+
+// ════════════════════════
+//  VISTA 2 — OPERADOR
+// ════════════════════════
+let autoToggleOn = true;
+let postulatedCount = 0;
+let pendingCount = 3;
+
+function updateFabCount() {
+  document.getElementById('fab-count').textContent = pendingCount;
+  if (pendingCount <= 0) document.getElementById('fab-all').classList.remove('show');
+}
+
+function toggleAuto() {
+  autoToggleOn = !autoToggleOn;
+  const t = document.getElementById('auto-toggle');
+  t.classList.toggle('on', autoToggleOn);
+}
+
+const driverPool = [
+  { avatar: '🧑', name: 'Carlos M.', stars: '⭐ 4.9', dist: '0.3 km' },
+  { avatar: '👨', name: 'Luis R.',   stars: '⭐ 4.7', dist: '0.6 km' },
+  { avatar: '🧔', name: 'Andrés P.', stars: '⭐ 4.8', dist: '0.9 km' },
+];
+
+function postularCard(cardId, btnId, animId) {
+  const btn  = document.getElementById(btnId);
+  const anim = document.getElementById(animId);
+  const card = cardId ? document.getElementById(cardId) : btn.closest('.srv-card');
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Analizando...';
+  anim.classList.add('show');
+
+  const steps = anim.querySelectorAll('.route-step');
+  // Reset: hide all except first, make sure first has spinner
+  steps.forEach((s, i) => {
+    if (i === 0) {
+      s.classList.remove('hidden');
+      s.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Analizando ruta óptima...';
+    } else {
+      s.classList.add('hidden');
+    }
+  });
+
+  // Step 1 done → step 2
+  setTimeout(() => {
+    steps[0].innerHTML = '<i class="fa-solid fa-check-circle" style="color:#4CAF50"></i> Ruta óptima calculada';
+    if (steps[1]) steps[1].classList.remove('hidden');
+  }, 900);
+
+  // Step 2 done → step 3
+  setTimeout(() => {
+    if (steps[1]) steps[1].innerHTML = '<i class="fa-solid fa-check-circle" style="color:#4CAF50"></i> ' + steps[1].textContent.trim();
+    if (steps[2]) steps[2].classList.remove('hidden');
   }, 1800);
+
+  // All done → show driver suggestions
+  setTimeout(() => {
+    if (steps[2]) steps[2].innerHTML = '<i class="fa-solid fa-check-circle" style="color:#4CAF50"></i> ' + steps[2].textContent.trim();
+    if (steps[3]) { steps[3].classList.remove('hidden'); }
+
+    btn.style.display = 'none';
+
+    // Inject driver chips
+    const existingDrivers = card.querySelector('.drivers-row');
+    if (!existingDrivers) {
+      const row = document.createElement('div');
+      row.className = 'drivers-row';
+      row.innerHTML = `<div style="font-size:11px;font-weight:700;color:var(--gray-600);width:100%;margin-bottom:4px;">Conductores sugeridos por IA:</div>` +
+        driverPool.map((d, i) => `
+          <div class="driver-chip" onclick="assignDriver(this, '${d.name}', '${cardId || 'card-op'}', '${animId}')">
+            <div class="dc-avatar">${d.avatar}</div>
+            <div class="dc-name">${d.name}</div>
+            <div class="dc-stars">${d.stars}</div>
+            <div class="dc-dist">${d.dist}</div>
+          </div>`).join('');
+      card.appendChild(row);
+
+      // Auto-assign after 5s if no manual selection
+      const autoTimer = setTimeout(() => {
+        const chips = row.querySelectorAll('.driver-chip');
+        if (!row.querySelector('.selected')) {
+          assignDriver(chips[0], driverPool[0].name, cardId || 'card-op', animId, true);
+        }
+      }, 5000);
+      row.dataset.autoTimer = autoTimer;
+    }
+  }, 2700);
 }
 
-let svcCounter = 9;
-function createService() {
-  const origin = document.getElementById('f-origin').value;
-  const dest = document.getElementById('f-dest').value;
-  if (!origin || !dest) { showToast('⚠️ Completa origen y destino'); return; }
+function assignDriver(chip, name, cardId, animId, auto = false) {
+  const card = chip.closest('.srv-card');
+  if (!card) return;
 
-  document.getElementById('modal-title').textContent = '¿Crear servicio?';
-  document.getElementById('modal-sub').textContent = `De: ${origin.split(',')[0]}\nA: ${dest.split(',')[0]}`;
-  document.getElementById('modal-btn').textContent = '✅ Confirmar y crear';
-  document.getElementById('modal-btn').onclick = () => {
-    const newSvc = {
-      id: 'SVC-00' + svcCounter++,
-      origin, dest,
-      status: 'pending',
-      messenger: aiDone ? 'Diego R.' : 'Sin asignar',
-      value: document.getElementById('f-value').value || '$0',
-      dist: aiDone ? '8.4km' : '--',
-      eta: '--',
-      emoji: '⏳'
-    };
-    services.unshift(newSvc);
-    document.getElementById('modal').classList.remove('show');
-    document.getElementById('m-total').textContent = parseInt(document.getElementById('m-total').textContent) + 1;
-    aiDone = false;
-    document.getElementById('aiBox').classList.remove('show');
-    showToast('🎉 Servicio ' + newSvc.id + ' creado exitosamente');
-    setTimeout(() => switchScreen('home'), 1200);
-  };
-  document.getElementById('modal').classList.add('show');
+  // Clear auto timer
+  const row = card.querySelector('.drivers-row');
+  if (row && row.dataset.autoTimer) clearTimeout(parseInt(row.dataset.autoTimer));
+
+  chip.classList.add('selected');
+
+  setTimeout(() => {
+    // Remove route anim and driver row
+    const anim = document.getElementById(animId);
+    if (anim) anim.classList.remove('show');
+    if (row) row.remove();
+
+    // Update card status badge
+    const badge = card.querySelector('.status-badge');
+    if (badge) { badge.className = 'status-badge badge-posted'; badge.textContent = 'Asignado ✓'; }
+    card.classList.add('postulated');
+
+    // Add assigned tag
+    const tag = document.createElement('div');
+    tag.className = 'card-assigned-tag';
+    tag.innerHTML = `<i class="fa-solid fa-user-check"></i> Asignado a: <strong>${name}</strong>${auto ? ' (Sistema)' : ''}`;
+    card.appendChild(tag);
+
+    postulatedCount++;
+    pendingCount = Math.max(0, pendingCount - 1);
+    document.getElementById('stat-postulados').textContent = postulatedCount;
+    updateFabCount();
+
+    if (postulatedCount === 1) {
+      document.getElementById('go-conductor-panel').style.display = 'block';
+    }
+    showNotice(auto ? `🤖 Sistema asignó a ${name}` : `✅ Asignado a ${name}`);
+  }, 400);
 }
 
-function closeModal(e) {
-  if (e.target === document.getElementById('modal')) {
-    document.getElementById('modal').classList.remove('show');
-  }
+function postularCardWA(btnId, animId, s2, s3, s4) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Procesando...';
+  const anim = document.getElementById(animId);
+  anim.classList.add('show');
+
+  setTimeout(() => { document.getElementById(s2).classList.remove('hidden'); }, 900);
+  setTimeout(() => { document.getElementById(s3).classList.remove('hidden'); }, 1800);
+  setTimeout(() => {
+    document.getElementById(s4).classList.remove('hidden');
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Postulado ✓';
+    btn.style.background = '#4CAF50';
+    postulatedCount++;
+    document.getElementById('stat-postulados').textContent = postulatedCount;
+    if (postulatedCount === 1) document.getElementById('go-conductor-panel').style.display = 'block';
+    showNotice('🤖 Servicio postulado con IA');
+  }, 2700);
 }
 
-// ─── MESSENGERS ──────────────────────────────────────────
-function renderMessengers() {
-  const list = document.getElementById('messengerList');
-  list.innerHTML = '';
-  messengers.forEach(m => {
-    const div = document.createElement('div');
-    div.className = 'mess-card';
-    const statusColors = { online:'online', busy:'busy', offline:'offline' };
-    const statusLabels = { online:'Disponible', busy:'En servicio', offline:'Desconectado' };
-    div.innerHTML = `
-      <div class="mess-card-top">
-        <div class="mess-avatar">
-          ${m.emoji}
-          <div class="mess-status-ring ${statusColors[m.status]}"></div>
+// ── MODAL POSTULAR TODOS ──
+const modalLabels = [
+  'Analizando 3 servicios pendientes...',
+  'Calculando rutas óptimas con IA...',
+  'Agrupando servicios por zona...',
+  'Asignando conductores disponibles...',
+  '¡Optimización completada!',
+];
+
+function openModalAll() {
+  if (pendingCount <= 0) return;
+  document.getElementById('modal-all').classList.add('show');
+  document.getElementById('modal-content').style.display = 'block';
+  document.getElementById('modal-done').style.display = 'none';
+  document.getElementById('modal-progress').style.width = '0%';
+  document.getElementById('modal-label').textContent = modalLabels[0];
+
+  // Build mini map nodes
+  const map = document.getElementById('mini-map');
+  map.querySelectorAll('.mini-node,.mini-line').forEach(e => e.remove());
+  const nodes = [
+    {x:40,y:30,c:'#1565C0'},{x:160,y:70,c:'#E53935'},{x:280,y:40,c:'#2E7D32'},
+    {x:100,y:100,c:'#F57F17'},{x:220,y:110,c:'#1565C0'},{x:350,y:90,c:'#E53935'},
+  ];
+  nodes.forEach(n => {
+    const el = document.createElement('div');
+    el.className = 'mini-node';
+    el.style.cssText = `left:${n.x}px;top:${n.y}px;background:${n.c}`;
+    map.appendChild(el);
+  });
+  const lines = [[0,1],[1,2],[0,3],[3,4],[4,5],[1,4]];
+  lines.forEach(([a,b]) => {
+    const na = nodes[a], nb = nodes[b];
+    const dx = nb.x - na.x, dy = nb.y - na.y;
+    const len = Math.sqrt(dx*dx+dy*dy);
+    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+    const el = document.createElement('div');
+    el.className = 'mini-line';
+    el.style.cssText = `left:${na.x+7}px;top:${na.y+6}px;width:${len}px;transform:rotate(${angle}deg)`;
+    map.appendChild(el);
+  });
+
+  // Animate
+  let step = 0;
+  const lineEls = map.querySelectorAll('.mini-line');
+  const interval = setInterval(() => {
+    step++;
+    const pct = Math.min(step * 22, 100);
+    document.getElementById('modal-progress').style.width = pct + '%';
+    document.getElementById('modal-label').textContent = modalLabels[Math.min(step-1, modalLabels.length-1)];
+    if (step <= lineEls.length) lineEls[step-1].classList.add('lit');
+    if (step >= 5) {
+      clearInterval(interval);
+      document.getElementById('modal-progress').style.width = '100%';
+      setTimeout(() => {
+        document.getElementById('modal-content').style.display = 'none';
+        document.getElementById('modal-done').style.display = 'block';
+        document.getElementById('done-sub-text').textContent = `${pendingCount} servicios optimizados y enviados a conductores disponibles.`;
+      }, 400);
+    }
+  }, 700);
+}
+
+function closeModalAll() {
+  document.getElementById('modal-all').classList.remove('show');
+  // Mark all pending cards as postulated
+  document.querySelectorAll('.srv-card .btn-postular:not([style*="none"])').forEach(btn => {
+    if (!btn.disabled) {
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Postulado ✓';
+      btn.style.background = '#4CAF50';
+      btn.disabled = true;
+      const card = btn.closest('.srv-card');
+      const badge = card.querySelector('.status-badge');
+      if (badge) { badge.className = 'status-badge badge-posted'; badge.textContent = 'Asignado ✓'; }
+      card.classList.add('postulated');
+      postulatedCount++;
+    }
+  });
+  pendingCount = 0;
+  document.getElementById('stat-postulados').textContent = postulatedCount;
+  updateFabCount();
+  document.getElementById('go-conductor-panel').style.display = 'block';
+  showView('conductor');
+}
+
+function processWhatsapp() {
+  const input = document.getElementById('wa-input');
+  const text = input.value.trim() || 'Hola, necesito un domicilio de la Cra 5 #10-20 al Centro Comercial Guatapurí, caja pequeña con documentos';
+  const proc = document.getElementById('wa-processing');
+  proc.classList.add('show');
+
+  setTimeout(() => {
+    proc.classList.remove('show');
+    input.value = '';
+    const cards = document.getElementById('op-cards');
+    const newCard = document.createElement('div');
+    newCard.className = 'srv-card new-card';
+    const uid = 'wa-' + Date.now();
+    newCard.innerHTML = `
+      <div class="srv-card-header">
+        <div>
+          <div class="srv-card-title">Pedido WhatsApp</div>
+          <div class="srv-card-code">SRV-00128 · Vía WhatsApp · IA procesado</div>
         </div>
-        <div class="mess-info">
-          <div class="mess-name">${m.name}</div>
-          <div class="mess-meta">${m.vehicle} · ${m.zone}</div>
-          ${m.isAIPick ? '<div class="ai-pick-badge">✨ Recomendado por IA</div>' : ''}
+        <span class="status-badge badge-new">Nuevo ✦ IA</span>
+      </div>
+      <div class="srv-card-row"><i class="fa-solid fa-location-dot"></i> Cra 5 #10-20</div>
+      <div class="srv-card-row"><i class="fa-solid fa-flag-checkered"></i> C.C. Guatapurí</div>
+      <div class="srv-card-row"><i class="fa-solid fa-box"></i> Caja pequeña con documentos</div>
+      <div class="srv-card-footer">
+        <div class="srv-value">$11.000</div>
+        <div id="ra-${uid}" class="route-anim">
+          <div class="route-step"><i class="fa-solid fa-circle-notch fa-spin"></i> Analizando ruta óptima...</div>
+          <div class="route-step hidden" id="ra2-${uid}"><i class="fa-solid fa-check-circle"></i> Ruta calculada: 1.5 km</div>
+          <div class="route-step hidden" id="ra3-${uid}"><i class="fa-solid fa-check-circle"></i> Conductor sugerido: disponible</div>
+          <div class="route-step hidden" id="ra4-${uid}" style="color:var(--blue-primary);font-weight:700;"><i class="fa-solid fa-check-circle"></i> ¡Servicio postulado! ✓</div>
         </div>
-        <button class="mess-assign-btn ${m.status==='offline'?'':''}${m.status==='busy'?'assigned':''}" onclick="assignMessenger(${m.id}, '${m.name}', this)">
-          ${m.status==='busy' ? '✅ Asignado' : m.status==='offline' ? 'Offline' : 'Asignar'}
+        <button class="btn-postular" id="btn-wa-${uid}" onclick="postularCardWA('btn-wa-${uid}','ra-${uid}','ra2-${uid}','ra3-${uid}','ra4-${uid}')">
+          <i class="fa-solid fa-robot"></i> Postular con IA
         </button>
-      </div>
-      <div class="mess-stats">
-        <div class="mess-stat">
-          <span class="mess-sv">${m.services}</span>
-          <span class="mess-sl">Servicios</span>
-        </div>
-        <div class="mess-stat">
-          <span class="mess-sv" style="color:var(--amber)">⭐${m.rating}</span>
-          <span class="mess-sl">Rating</span>
-        </div>
-        <div class="mess-stat">
-          <span class="mess-sv">${m.km}km</span>
-          <span class="mess-sl">Hoy</span>
-        </div>
-        <div class="mess-stat">
-          <span class="mess-sv" style="font-size:11px">${m.time}</span>
-          <span class="mess-sl">Tiempo</span>
-        </div>
-      </div>
-      ${m.status === 'busy' ? `
-      <div class="mess-route-preview">
-        <div class="mrp-dot"></div>
-        <span class="mrp-text">En ruta · ${m.zone} · ETA aprox. 15 min</span>
-      </div>` : ''}
-    `;
-    list.appendChild(div);
-  });
-}
-renderMessengers();
-
-function assignMessenger(id, name, btn) {
-  const m = messengers.find(x => x.id === id);
-  if (!m || m.status === 'offline') { showToast('⚠️ Mensajero no disponible'); return; }
-  if (m.status === 'busy') { showToast(`ℹ️ ${name} ya tiene un servicio activo`); return; }
-
-  document.getElementById('modal-title').textContent = 'Asignar mensajero';
-  document.getElementById('modal-sub').textContent = `¿Asignar ${name} al siguiente servicio pendiente?`;
-  document.getElementById('modal-btn').textContent = '🚴 Confirmar asignación';
-  document.getElementById('modal-btn').onclick = () => {
-    m.status = 'busy';
-    m.services++;
-    document.getElementById('modal').classList.remove('show');
-    renderMessengers();
-    showToast(`✅ ${name} asignado exitosamente`);
-  };
-  document.getElementById('modal').classList.add('show');
+      </div>`;
+    cards.insertBefore(newCard, cards.firstChild);
+    pendingCount++;
+    updateFabCount();
+    document.getElementById('stat-entrantes').textContent = parseInt(document.getElementById('stat-entrantes').textContent) + 1;
+    showNotice('🤖 IA armó tarjeta desde WhatsApp');
+  }, 2000);
 }
 
-// ─── MAP CANVAS ───────────────────────────────────────────
-let mapAnimFrame = null;
-let mapTime = 0;
-let mapNodes = [];
+// ════════════════════════
+//  VISTA 3 — CONDUCTOR
+// ════════════════════════
+function applyService(id) {
+  const card = document.getElementById('drv-card-' + id);
+  const btn  = document.getElementById('apply-btn-' + id);
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
 
-function initMapCanvas() {
-  const canvas = document.getElementById('mapCanvas');
-  const wrap = canvas.parentElement;
-  canvas.width = wrap.offsetWidth;
-  canvas.height = wrap.offsetHeight;
+  setTimeout(() => {
+    // Clone to assigned
+    const assigned = document.getElementById('assigned-cards');
+    const section  = document.getElementById('assigned-section');
+    section.style.display = 'block';
 
-  // Define nodes representing service points in the city
-  mapNodes = [
-    // Orígenes (azul)
-    { x: 0.35, y: 0.22, type:'origin', label:'SVC-001', svc:services[0] },
-    { x: 0.62, y: 0.15, type:'origin', label:'SVC-002', svc:services[1] },
-    { x: 0.22, y: 0.45, type:'origin', label:'SVC-004', svc:services[3] },
-    // Destinos (verde)
-    { x: 0.20, y: 0.68, type:'dest', label:'Fontibón', svc:services[0] },
-    { x: 0.40, y: 0.72, type:'dest', label:'Salitre', svc:services[1] },
-    { x: 0.55, y: 0.60, type:'dest', label:'Teusaquillo', svc:services[3] },
-    // Mensajeros (ámbar, moving)
-    { x: 0.28, y: 0.44, type:'messenger', label:'Diego', vx:0.0006, vy:0.0005, svc:services[0] },
-    { x: 0.51, y: 0.35, type:'messenger', label:'Camila', vx:-0.0004, vy:0.0008, svc:services[1] },
-    { x: 0.36, y: 0.50, type:'messenger', label:'Luis', vx:0.0005, vy:0.0003, svc:services[3] },
-  ];
+    const clone = card.cloneNode(true);
+    clone.classList.add('assigned');
+    clone.id = 'assigned-' + id;
+    // Replace header badge
+    const badge = clone.querySelector('.status-badge');
+    badge.className = 'status-badge badge-posted';
+    badge.textContent = 'En camino 🛵';
+    // Remove old button
+    const footer = clone.querySelector('.driver-card-footer');
+    footer.querySelector('.btn-apply').replaceWith((() => {
+      const s = document.createElement('span');
+      s.className = 'btn-applied';
+      s.innerHTML = '<i class="fa-solid fa-check-circle"></i> Asignado';
+      return s;
+    })());
+    assigned.appendChild(clone);
 
-  if (mapAnimFrame) cancelAnimationFrame(mapAnimFrame);
-  animateMap();
+    // Remove original card
+    card.style.opacity = '0';
+    card.style.transition = 'opacity .3s';
+    setTimeout(() => card.remove(), 300);
+
+    showNotice('🛵 ¡Servicio asignado! Ya puedes ir a recoger.');
+  }, 1000);
 }
-
-function animateMap() {
-  const canvas = document.getElementById('mapCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  mapTime += 0.016;
-
-  ctx.clearRect(0, 0, W, H);
-
-  // BG
-  const bg = ctx.createLinearGradient(0,0,W,H);
-  bg.addColorStop(0,'#080b15');
-  bg.addColorStop(1,'#050810');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0,0,W,H);
-
-  // City grid streets
-  ctx.strokeStyle = 'rgba(61,127,255,0.08)';
-  ctx.lineWidth = 1;
-  // Horizontales
-  [0.15,0.3,0.45,0.6,0.75,0.88].forEach(y => {
-    ctx.beginPath(); ctx.moveTo(0, H*y); ctx.lineTo(W, H*y); ctx.stroke();
-  });
-  // Verticales
-  [0.12,0.28,0.44,0.6,0.76,0.9].forEach(x => {
-    ctx.beginPath(); ctx.moveTo(W*x, 0); ctx.lineTo(W*x, H); ctx.stroke();
-  });
-
-  // Diagonals (avenues)
-  ctx.strokeStyle = 'rgba(61,127,255,0.05)';
-  ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.moveTo(0, H*0.1); ctx.lineTo(W, H*0.9); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(W*0.1, 0); ctx.lineTo(W*0.9, H); ctx.stroke();
-
-  // City zones (colored areas)
-  const zones = [
-    { x:0.05, y:0.05, w:0.4, h:0.35, c:'rgba(61,127,255,0.04)' },
-    { x:0.5, y:0.05, w:0.45, h:0.35, c:'rgba(16,185,129,0.03)' },
-    { x:0.1, y:0.55, w:0.35, h:0.38, c:'rgba(245,158,11,0.03)' },
-    { x:0.5, y:0.45, w:0.42, h:0.45, c:'rgba(139,92,246,0.03)' },
-  ];
-  zones.forEach(z => {
-    ctx.fillStyle = z.c;
-    ctx.beginPath();
-    ctx.roundRect(W*z.x, H*z.y, W*z.w, H*z.h, 4);
-    ctx.fill();
-  });
-
-  // Routes between pairs
-  const pairs = [
-    { from: mapNodes[0], to: mapNodes[3], color:'rgba(61,127,255,0.3)' },
-    { from: mapNodes[1], to: mapNodes[4], color:'rgba(16,185,129,0.3)' },
-    { from: mapNodes[2], to: mapNodes[5], color:'rgba(245,158,11,0.3)' },
-  ];
-  pairs.forEach(p => {
-    const x1 = p.from.x * W, y1 = p.from.y * H;
-    const x2 = p.to.x * W, y2 = p.to.y * H;
-    // Dashed route
-    ctx.strokeStyle = p.color;
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([6, 5]);
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    const mx = (x1+x2)/2 + (y2-y1)*0.3;
-    const my = (y1+y2)/2 - (x2-x1)*0.2;
-    ctx.quadraticCurveTo(mx, my, x2, y2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Animated packet along route
-    const t = (Math.sin(mapTime * 0.5 + pairs.indexOf(p)) * 0.5 + 0.5);
-    const bx = (1-t)*(1-t)*x1 + 2*(1-t)*t*mx + t*t*x2;
-    const by = (1-t)*(1-t)*y1 + 2*(1-t)*t*my + t*t*y2;
-    ctx.beginPath();
-    ctx.arc(bx, by, 3, 0, Math.PI*2);
-    ctx.fillStyle = p.color.replace('0.3','0.9');
-    ctx.fill();
-  });
-
-  // Move messenger nodes
-  mapNodes.filter(n => n.type === 'messenger').forEach(n => {
-    if (n.vx) {
-      n.x += n.vx * Math.sin(mapTime * 0.7 + n.vx * 1000);
-      n.y += n.vy * Math.cos(mapTime * 0.5 + n.vy * 1000);
-      n.x = Math.max(0.1, Math.min(0.9, n.x));
-      n.y = Math.max(0.1, Math.min(0.9, n.y));
-    }
-  });
-
-  // Draw nodes
-  mapNodes.forEach(n => {
-    const nx = n.x * W, ny = n.y * H;
-    const colors = { origin:'#3d7fff', dest:'#10b981', messenger:'#f59e0b' };
-    const c = colors[n.type];
-
-    // Glow
-    const grd = ctx.createRadialGradient(nx,ny,0,nx,ny,20);
-    grd.addColorStop(0, c.replace('#','rgba(').replace(/(..)(..)(..)/, (_, r,g,b) => `${parseInt(r,16)},${parseInt(g,16)},${parseInt(b,16)},0.25)`));
-    grd.addColorStop(1,'transparent');
-    ctx.fillStyle = grd;
-    ctx.beginPath(); ctx.arc(nx, ny, 20, 0, Math.PI*2); ctx.fill();
-
-    // Ping for messengers
-    if (n.type === 'messenger') {
-      const pingR = 10 + Math.sin(mapTime * 2) * 6;
-      ctx.strokeStyle = `rgba(245,158,11,${0.3 - Math.sin(mapTime*2)*0.1})`;
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.arc(nx, ny, pingR, 0, Math.PI*2); ctx.stroke();
-    }
-
-    // Node dot
-    ctx.beginPath();
-    ctx.arc(nx, ny, n.type==='messenger' ? 7 : 6, 0, Math.PI*2);
-    ctx.fillStyle = c;
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(8,9,15,0.8)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Icon inside
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 8px IBM Plex Mono, monospace';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const icons = { origin:'●', dest:'■', messenger:'▲' };
-    ctx.fillText(icons[n.type], nx, ny);
-
-    // Label
-    ctx.fillStyle = c;
-    ctx.font = '10px IBM Plex Mono, monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(n.label, nx, ny + 16);
-  });
-
-  mapAnimFrame = requestAnimationFrame(animateMap);
-}
-
-// Click on map
-document.getElementById('mapCanvas').addEventListener('click', e => {
-  const canvas = document.getElementById('mapCanvas');
-  const rect = canvas.getBoundingClientRect();
-  const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
-  const my = (e.clientY - rect.top) * (canvas.height / rect.height);
-
-  // Find nearest node
-  let nearest = null, minDist = 40;
-  mapNodes.forEach(n => {
-    const d = Math.hypot(n.x * canvas.width - mx, n.y * canvas.height - my);
-    if (d < minDist) { nearest = n; minDist = d; }
-  });
-
-  if (nearest && nearest.svc) {
-    const s = nearest.svc;
-    document.getElementById('mac-id').textContent = s.id;
-    document.getElementById('mac-origin').textContent = s.origin.split(',')[0];
-    document.getElementById('mac-dest').textContent = s.dest.split(',')[0];
-    document.getElementById('mac-dist').textContent = s.dist;
-    document.getElementById('mac-eta').textContent = s.eta === '--' ? 'N/A' : s.eta;
-    document.getElementById('mac-status').textContent = s.status === 'transit' ? '🔵' : s.status === 'pending' ? '🟡' : '🟢';
-    document.getElementById('mapCard').classList.add('show');
-  }
-});
-
-// Filter chips
-document.querySelectorAll('.filter-chip').forEach(chip => {
-  chip.addEventListener('click', function() {
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-    this.classList.add('active');
-    showToast('Filtro: ' + this.textContent);
-  });
-});
 </script>
 </body>
 </html>
