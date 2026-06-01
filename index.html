@@ -89,8 +89,9 @@
     background: linear-gradient(160deg, #E3F2FD 0%, #EEF5FF 100%);
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     padding-top: 36px;
+    padding-bottom: 28px;
   }
   #view-cliente.active { display: flex !important; }
 
@@ -103,6 +104,77 @@
     flex-direction: column;
     overflow: hidden;
     position: relative;
+  }
+
+  .device-stage {
+    width: 100%;
+    min-height: calc(100vh - 64px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px 14px;
+  }
+
+  .phone-frame {
+    width: min(335px, calc(100vw - 34px));
+    height: min(685px, calc(100vh - 92px));
+    min-height: 560px;
+    background:
+      linear-gradient(145deg, rgba(255,255,255,.16), transparent 26%),
+      linear-gradient(155deg, #172033, #070B12 70%);
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 42px;
+    padding: 28px 13px 30px;
+    box-shadow:
+      0 28px 70px rgba(13,71,161,.24),
+      inset 0 0 0 2px rgba(255,255,255,.05),
+      inset 0 -12px 24px rgba(0,0,0,.35);
+    position: relative;
+  }
+  .phone-frame::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92px;
+    height: 22px;
+    background: #070B12;
+    border-radius: 0 0 16px 16px;
+    z-index: 3;
+  }
+  .phone-frame::after {
+    content: '';
+    position: absolute;
+    bottom: 11px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 116px;
+    height: 4px;
+    background: rgba(255,255,255,.36);
+    border-radius: 999px;
+    z-index: 4;
+  }
+  .phone-speaker {
+    position: absolute;
+    top: 17px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 44px;
+    height: 4px;
+    background: #28354A;
+    border-radius: 999px;
+    z-index: 4;
+  }
+  .phone-frame .phone-shell {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    border-radius: 30px;
+    box-shadow: none;
+  }
+  .phone-frame #chat-window {
+    height: 100%;
   }
 
   /* App header */
@@ -137,6 +209,11 @@
   }
   .ai-badge .dot { width: 7px; height: 7px; background: var(--green-neon); border-radius: 50%; animation: pulse 1.5s infinite; }
   @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+
+  #view-cliente.chat-active .app-header,
+  #view-cliente.chat-active .ai-badge {
+    display: none;
+  }
 
   /* Chat list */
   .chat-list { flex: 1; overflow-y: auto; background: var(--gray-100); }
@@ -244,6 +321,7 @@
     padding: 16px;
     border: 1.5px solid var(--blue-soft);
     display: none;
+    flex-shrink: 0;
   }
   .order-card.show { display: block; }
   .order-card h4 { font-family: 'Syne', sans-serif; font-size: 14px; color: var(--blue-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
@@ -266,7 +344,8 @@
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-weight: 700; font-size: 14px;
     cursor: pointer; transition: background .2s;
-    margin-top: 4px;
+    margin-top: 8px;
+    margin-bottom: 4px;
   }
   .btn-confirm:hover { background: var(--blue-dark); }
 
@@ -306,24 +385,366 @@
      VISTA 2 — OPERADOR (DESKTOP)
   ════════════════════════════════ */
   #view-operador {
-    background: #F0F4FF;
+    background:
+      radial-gradient(circle at 12% 12%, rgba(66,165,245,.22), transparent 32%),
+      linear-gradient(160deg, #E3F2FD 0%, #F0F4FF 100%);
     min-height: calc(100vh - 36px);
+    padding: 48px 22px 18px;
+    align-items: center;
+    justify-content: center;
+  }
+  #view-operador.active { display: flex !important; }
+
+  .monitor-stage {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .desktop-device {
+    width: min(1160px, calc(100vw - 38px));
+    position: relative;
+    display: flex;
+    justify-content: center;
+  }
+  .desktop-screen {
+    width: 100%;
+    height: min(620px, calc(100vh - 174px));
+    min-height: 500px;
+    background: white;
+    border: 12px solid #101827;
+    border-bottom-width: 18px;
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow:
+      0 34px 80px rgba(13,71,161,.26),
+      inset 0 0 0 1px rgba(255,255,255,.2);
+    display: flex;
+    flex-direction: row;
+    position: relative;
+  }
+  .op-sidebar {
+    width: 210px;
+    background: var(--blue-primary);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 14px 10px;
+    gap: 10px;
+    transition: width .22s ease;
+    flex-shrink: 0;
+  }
+  .op-sidebar.collapsed { width: 72px; }
+  .op-side-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 6px 12px;
+    border-bottom: 1px solid rgba(255,255,255,.16);
+  }
+  .op-side-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, var(--blue-primary), var(--blue-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .op-side-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; line-height: 1; color: white; }
+  .op-side-sub { font-size: 10px; color: #BBDEFB; margin-top: 2px; }
+  .op-side-toggle {
+    margin-left: auto;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: none;
+  }
+  .op-menu { display: flex; flex-direction: column; gap: 5px; }
+  .op-menu-btn {
+    border: none;
+    background: transparent;
+    color: #D7ECFF;
+    border-radius: 12px;
+    padding: 11px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: left;
+    transition: background .2s, color .2s;
+  }
+  .op-menu-btn i { width: 18px; text-align: center; font-size: 15px; flex-shrink: 0; }
+  .op-menu-btn.active,
+  .op-menu-btn:hover { background: white; color: var(--blue-primary); box-shadow: var(--shadow-sm); }
+  .op-menu-btn.disabled { opacity: .45; cursor: default; }
+  .op-menu-btn.disabled:hover { background: transparent; color: #D7ECFF; box-shadow: none; }
+  .op-sidebar.collapsed .op-side-title-wrap,
+  .op-sidebar.collapsed .op-menu-btn span,
+  .op-sidebar.collapsed .op-side-logo { display: none; }
+  .op-sidebar.collapsed .op-side-head { justify-content: center; padding-left: 0; padding-right: 0; }
+  .op-sidebar.collapsed .op-side-toggle { margin-left: 0; }
+  .op-sidebar.collapsed .op-menu-btn { justify-content: center; padding-left: 0; padding-right: 0; }
+  .op-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: #F0F4FF;
+  }
+  .op-view {
+    display: none !important;
+    flex: 1;
+    min-height: 0;
+  }
+  .op-view.active { display: flex !important; }
+
+  .op-map-view,
+  .op-chat-view {
+    padding: 24px 32px;
+    overflow: hidden;
+    gap: 18px;
+  }
+  .op-map-panel {
+    flex: 1;
+    min-height: 0;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .op-map-head,
+  .op-chat-head {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  .op-map-canvas {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+  }
+  .courier-marker {
+    position: absolute;
+    z-index: 8;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: white;
+    border: 1px solid rgba(21,101,192,.14);
+    border-radius: 18px;
+    padding: 8px 11px 8px 8px;
+    box-shadow: var(--shadow-md);
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-dark);
+    animation: courierFloat 3.2s ease-in-out infinite;
+  }
+  .courier-marker.moving-a { animation: courierMoveA 5s ease-in-out infinite; }
+  .courier-marker.moving-b { animation: courierMoveB 6s ease-in-out infinite; }
+  .courier-marker:nth-of-type(2n) { animation-delay: .4s; }
+  .courier-marker:nth-of-type(3n) { animation-delay: .8s; }
+  .courier-marker .cm-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--blue-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .courier-marker .cm-icon::after {
+    content: '';
+    position: absolute;
+    inset: -7px;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    opacity: .25;
+    animation: mapPing 2s ease-out infinite;
+  }
+  .courier-marker.available .cm-icon { background: #2E7D32; }
+  .courier-marker.busy .cm-icon { background: #F57F17; }
+  .courier-marker.offline .cm-icon { background: #78909C; }
+  .courier-marker small {
+    display: block;
+    color: var(--gray-600);
+    font-size: 9px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  @keyframes courierFloat { 50% { transform: translateY(-4px); } }
+  @keyframes courierMoveA {
+    0%,100% { transform: translate(0,0); }
+    45% { transform: translate(22px, -10px); }
+    72% { transform: translate(34px, 8px); }
+  }
+  @keyframes courierMoveB {
+    0%,100% { transform: translate(0,0); }
+    38% { transform: translate(-18px, 12px); }
+    70% { transform: translate(14px, 20px); }
+  }
+  .courier-dot {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--blue-light);
+    z-index: 6;
+    box-shadow: 0 0 0 6px rgba(66,165,245,.13);
+    animation: mapPing 2.2s ease-out infinite;
+  }
+  .op-map-stats {
+    width: 260px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .op-chat-view { display: none; }
+  .op-chat-shell {
+    flex: 1;
+    min-height: 0;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    overflow: hidden;
+  }
+  .op-chat-list {
+    border-right: 1px solid var(--gray-200);
+    background: var(--gray-100);
+    overflow-y: auto;
+  }
+  .op-chat-item {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--gray-200);
+    cursor: pointer;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .op-chat-item.active,
+  .op-chat-item:hover { background: white; }
+  .op-chat-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--blue-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .op-chat-title { font-weight: 800; font-size: 13px; color: var(--text-dark); }
+  .op-chat-preview { font-size: 11px; color: var(--gray-600); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 190px; }
+  .op-chat-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .op-chat-messages {
+    flex: 1;
+    padding: 18px;
+    overflow-y: auto;
+    background: var(--blue-xsoft);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .op-msg {
+    max-width: 68%;
+    padding: 10px 13px;
+    border-radius: 15px;
+    box-shadow: var(--shadow-sm);
+    font-size: 12.5px;
+    line-height: 1.45;
+  }
+  .op-msg.client { background: white; align-self: flex-start; border-bottom-left-radius: 4px; }
+  .op-msg.operator { background: var(--blue-primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .op-chat-input {
+    padding: 12px;
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    gap: 10px;
+    background: white;
+  }
+  .op-chat-input input {
+    flex: 1;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 999px;
+    padding: 10px 14px;
+    outline: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .desktop-camera {
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 7px;
+    height: 7px;
+    background: #26354D;
+    border-radius: 50%;
+    z-index: 5;
+    box-shadow: 0 0 0 2px #060A12;
+  }
+  .monitor-neck {
+    width: 96px;
+    height: 42px;
+    background: linear-gradient(180deg, #182235, #0A0F18);
+    border-radius: 0 0 14px 14px;
+    box-shadow: inset 0 10px 14px rgba(255,255,255,.06);
+  }
+  .monitor-base {
+    width: 230px;
+    height: 22px;
+    margin-top: -1px;
+    background: linear-gradient(180deg, #1A2538, #080D16);
+    border-radius: 50% 50% 18px 18px;
+    box-shadow: 0 18px 34px rgba(13,27,42,.25);
   }
 
   .op-topbar {
-    background: var(--blue-primary);
+    background: linear-gradient(180deg, #EAF4FF 0%, #DCEEFF 100%);
     padding: 0 32px;
     display: flex; align-items: center; gap: 16px;
     height: 60px;
-    box-shadow: 0 2px 12px rgba(13,71,161,.3);
+    box-shadow: 0 2px 12px rgba(13,71,161,.12);
   }
-  .op-topbar .logo { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: white; }
-  .op-topbar .logo span { color: var(--blue-light); }
-  .op-topbar .op-role { background: rgba(255,255,255,0.15); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-  .op-topbar .ai-live { margin-left: auto; display: flex; align-items: center; gap: 6px; color: white; font-size: 12px; }
+  .op-topbar .logo { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--blue-dark); }
+  .op-topbar .logo span { color: var(--blue-medium); }
+  .op-topbar .op-role { background: white; color: var(--blue-primary); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; box-shadow: var(--shadow-sm); }
+  .op-topbar .ai-live { margin-left: auto; display: flex; align-items: center; gap: 6px; color: var(--blue-dark); font-size: 12px; font-weight: 700; }
   .op-topbar .ai-live .dot { width: 8px; height: 8px; background: var(--green-neon); border-radius: 50%; animation: pulse 1.5s infinite; }
 
   .op-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; padding: 24px 32px; max-width: 1400px; }
+  .desktop-screen .op-layout {
+    flex: 1;
+    min-height: 0;
+    max-width: none;
+    overflow: auto;
+  }
+  .op-layout.op-view.active { display: grid !important; }
 
   /* Column headers */
   .col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
@@ -409,6 +830,44 @@
   .panel-card-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
   .panel-card-title i { color: var(--blue-primary); }
 
+  .ops-list { display: flex; flex-direction: column; gap: 10px; }
+  .ops-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--blue-xsoft);
+    border: 1px solid var(--blue-soft);
+    border-radius: var(--radius-sm);
+  }
+  .ops-row strong { font-size: 12px; color: var(--text-dark); }
+  .ops-row span { font-size: 11px; color: var(--gray-600); display: block; margin-top: 2px; }
+  .ops-pill {
+    flex-shrink: 0;
+    background: white;
+    color: var(--blue-primary);
+    border-radius: 999px;
+    padding: 5px 9px;
+    font-size: 11px;
+    font-weight: 800;
+    box-shadow: var(--shadow-sm);
+  }
+  .ops-meter {
+    height: 8px;
+    background: var(--gray-200);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 12px;
+  }
+  .ops-meter span {
+    display: block;
+    height: 100%;
+    width: 78%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--blue-primary), var(--green-neon));
+  }
+
   .whatsapp-area {
     width: 100%;
     min-height: 90px;
@@ -487,37 +946,143 @@
     background: linear-gradient(160deg, #E3F2FD 0%, #EEF5FF 100%);
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     padding-top: 36px;
+    padding-bottom: 28px;
   }
   #view-conductor.active { display: flex !important; }
+
+  #view-conductor .app-header {
+    padding: 11px 16px 10px;
+    gap: 8px;
+  }
+  #view-conductor .app-header .logo-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    font-size: 14px;
+  }
+  #view-conductor .app-header .app-title {
+    font-size: 16px;
+  }
+  #view-conductor .app-header .app-sub {
+    font-size: 10px;
+  }
+  #view-conductor .app-header .header-right {
+    gap: 10px;
+    font-size: 16px;
+  }
 
   /* Map simulation */
   .map-container {
     width: 100%;
-    height: 200px;
-    background: #D0E8FF;
+    height: 210px;
+    background:
+      radial-gradient(circle at 18% 18%, rgba(255,255,255,.72), transparent 18%),
+      radial-gradient(circle at 82% 68%, rgba(25,118,210,.12), transparent 26%),
+      linear-gradient(135deg, #D7EAF8 0%, #EDF6FB 48%, #DCEFF9 100%);
     position: relative;
     overflow: hidden;
     flex-shrink: 0;
   }
+  .map-container::before {
+    content: '';
+    position: absolute;
+    inset: -40px;
+    background-image:
+      linear-gradient(27deg, transparent 0 47%, rgba(120,166,205,.22) 48% 49%, transparent 50%),
+      linear-gradient(112deg, transparent 0 46%, rgba(120,166,205,.18) 47% 48%, transparent 49%),
+      linear-gradient(4deg, transparent 0 48%, rgba(255,255,255,.62) 49% 52%, transparent 53%),
+      linear-gradient(90deg, transparent 0 49%, rgba(126,169,207,.12) 50%, transparent 51%);
+    background-size: 118px 76px, 132px 92px, 106px 78px, 86px 70px;
+    opacity: .9;
+  }
+  .map-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,.24), transparent 34%, rgba(13,71,161,.08));
+    pointer-events: none;
+  }
   .map-grid {
     position: absolute; inset: 0;
     background-image:
-      linear-gradient(rgba(21,101,192,.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(21,101,192,.08) 1px, transparent 1px);
-    background-size: 30px 30px;
+      linear-gradient(rgba(79,130,176,.09) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,130,176,.09) 1px, transparent 1px),
+      linear-gradient(rgba(255,255,255,.42) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.42) 1px, transparent 1px);
+    background-size: 36px 36px, 36px 36px, 108px 108px, 108px 108px;
+    opacity: .5;
+  }
+  .map-block {
+    position: absolute;
+    z-index: 1;
+    background: rgba(232,243,250,.62);
+    border: 1px solid rgba(128,170,206,.12);
+    border-radius: 12px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.55);
   }
   .map-road-h {
     position: absolute;
-    height: 8px;
-    background: rgba(255,255,255,0.7);
-    border-radius: 4px;
+    height: 10px;
+    background: rgba(255,255,255,0.88);
+    border-radius: 999px;
+    box-shadow: 0 1px 0 rgba(21,101,192,.08), inset 0 0 0 1px rgba(128,170,206,.08);
   }
   .map-road-v {
     position: absolute;
-    width: 8px;
-    background: rgba(255,255,255,0.7);
-    border-radius: 4px;
+    width: 10px;
+    background: rgba(255,255,255,0.88);
+    border-radius: 999px;
+    box-shadow: 1px 0 0 rgba(21,101,192,.08), inset 0 0 0 1px rgba(128,170,206,.08);
+  }
+  .map-road-diag {
+    position: absolute;
+    height: 9px;
+    background: rgba(255,255,255,.9);
+    border-radius: 999px;
+    transform-origin: left center;
+    box-shadow: 0 1px 0 rgba(21,101,192,.08), inset 0 0 0 1px rgba(128,170,206,.08);
+  }
+  .map-artery {
+    position: absolute;
+    height: 18px;
+    background: rgba(255,255,255,.94);
+    border-radius: 999px;
+    transform-origin: left center;
+    box-shadow:
+      0 3px 10px rgba(61,112,158,.08),
+      inset 0 0 0 1px rgba(126,169,207,.12);
+    z-index: 2;
+  }
+  .map-artery::after {
+    content: '';
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 50%;
+    height: 1px;
+    background: repeating-linear-gradient(90deg, rgba(126,169,207,.42) 0 10px, transparent 10px 18px);
+  }
+  .map-minor-road {
+    position: absolute;
+    height: 5px;
+    background: rgba(168,200,226,.28);
+    border-radius: 999px;
+    transform-origin: left center;
+    z-index: 1;
+  }
+  .map-zone {
+    position: absolute;
+    z-index: 1;
+    padding: 4px 8px;
+    background: rgba(255,255,255,.64);
+    color: rgba(13,71,161,.52);
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .4px;
+    text-transform: uppercase;
   }
   .map-pin {
     position: absolute;
@@ -526,19 +1091,134 @@
     transform: rotate(-45deg);
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    z-index: 5;
   }
   .map-pin i { transform: rotate(45deg); font-size: 12px; color: white; }
-  .map-pin.origin { background: var(--blue-primary); top: 60px; left: 60px; }
-  .map-pin.dest { background: #E53935; top: 100px; left: 260px; }
+  .map-pin.origin { background: var(--blue-primary); top: 62px; left: 48px; }
+  .map-pin.dest { background: #E53935; top: 112px; left: 270px; }
   .map-route-line {
     position: absolute;
-    top: 74px; left: 74px;
-    width: 200px; height: 2px;
-    background: linear-gradient(90deg, var(--blue-primary), #E53935);
-    transform-origin: left center;
-    transform: rotate(10deg);
+    top: 78px;
+    left: 68px;
+    width: 225px;
+    height: 74px;
+    z-index: 4;
+    pointer-events: none;
   }
-  .map-overlay { position: absolute; bottom: 10px; right: 10px; background: rgba(255,255,255,.9); border-radius: var(--radius-sm); padding: 6px 12px; font-size: 11px; font-weight: 700; color: var(--blue-primary); box-shadow: var(--shadow-sm); }
+  .map-route-line svg { width: 100%; height: 100%; overflow: visible; }
+  .route-shadow { fill: none; stroke: rgba(13,71,161,.2); stroke-width: 13; stroke-linecap: round; }
+  .route-main { fill: none; stroke: url(#routeGradient); stroke-width: 5.5; stroke-linecap: round; stroke-dasharray: 14 9; animation: routeFlow 1.2s linear infinite; filter: drop-shadow(0 2px 3px rgba(13,71,161,.18)); }
+  @keyframes routeFlow { to { stroke-dashoffset: -46; } }
+  .map-moto {
+    position: absolute;
+    top: 92px;
+    left: 154px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--blue-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 6;
+    box-shadow: 0 8px 18px rgba(21,101,192,.34);
+    animation: motoPulse 1.8s ease-in-out infinite;
+  }
+  .map-moto::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border: 2px solid rgba(21,101,192,.2);
+    border-radius: 50%;
+    animation: mapPing 1.8s ease-out infinite;
+  }
+  @keyframes motoPulse { 50% { transform: translate(5px, 3px) scale(1.04); } }
+  @keyframes mapPing { to { transform: scale(1.6); opacity: 0; } }
+  .map-chip {
+    position: absolute;
+    z-index: 6;
+    background: rgba(255,255,255,.94);
+    border: 1px solid rgba(21,101,192,.12);
+    border-radius: 12px;
+    padding: 6px 9px;
+    box-shadow: var(--shadow-sm);
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-dark);
+  }
+  .map-chip small { display: block; margin-top: 1px; font-size: 9px; color: var(--gray-600); font-weight: 700; }
+  .map-chip.pickup { top: 90px; left: 14px; }
+  .map-chip.dropoff { top: 144px; right: 12px; }
+  .map-eta-card {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    z-index: 6;
+    background: rgba(255,255,255,.95);
+    border: 1px solid rgba(21,101,192,.12);
+    border-radius: 14px;
+    padding: 8px 10px;
+    box-shadow: var(--shadow-sm);
+  }
+  .map-eta-title { font-size: 10px; font-weight: 800; color: var(--blue-primary); display: flex; align-items: center; gap: 5px; }
+  .map-eta-meta { font-size: 9px; color: var(--gray-600); font-weight: 700; margin-top: 2px; }
+  .map-eta-meta strong { color: var(--text-dark); }
+  .map-overlay { position: absolute; bottom: 10px; right: 10px; background: rgba(255,255,255,.9); border-radius: var(--radius-sm); padding: 6px 12px; font-size: 11px; font-weight: 700; color: var(--blue-primary); box-shadow: var(--shadow-sm); z-index: 6; }
+  .map-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 4;
+    border: none;
+    background: rgba(255,255,255,.94);
+    color: var(--blue-primary);
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: var(--shadow-sm);
+  }
+  .map-toggle:hover { background: white; }
+  #view-conductor.map-hidden .phone-shell > .map-container {
+    display: none;
+  }
+  #view-conductor.map-hidden .phone-shell > .map-container .map-grid,
+  #view-conductor.map-hidden .phone-shell > .map-container .map-road-h,
+  #view-conductor.map-hidden .phone-shell > .map-container .map-road-v,
+  #view-conductor.map-hidden .phone-shell > .map-container .map-road-diag,
+  #view-conductor.map-hidden .phone-shell > .map-container .map-artery,
+  #view-conductor.map-hidden .phone-shell > .map-container .map-minor-road,
+  #view-conductor.map-hidden .phone-shell > .map-container .map-block,
+  #view-conductor.map-hidden .phone-shell > .map-container .map-zone,
+  #view-conductor.map-hidden .phone-shell > .map-container .map-route-line,
+  #view-conductor.map-hidden .phone-shell > .map-container .map-moto,
+  #view-conductor.map-hidden .phone-shell > .map-container .map-chip,
+  #view-conductor.map-hidden .phone-shell > .map-container .map-eta-card,
+  #view-conductor.map-hidden .phone-shell > .map-container .map-pin,
+  #view-conductor.map-hidden .phone-shell > .map-container .map-overlay {
+    display: none;
+  }
+  .map-toggle-inline {
+    display: none;
+    border: none;
+    background: var(--blue-soft);
+    color: var(--blue-primary);
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 10.5px;
+    font-weight: 800;
+    cursor: pointer;
+    align-items: center;
+    gap: 5px;
+  }
+  #view-conductor.map-hidden .map-toggle-inline { display: flex; }
 
   /* Driver bottom nav */
   .driver-bottom-nav {
@@ -559,7 +1239,7 @@
 
   /* Driver content */
   .driver-content { flex: 1; overflow-y: auto; background: var(--gray-100); }
-  .driver-section { padding: 14px 16px 6px; font-size: 11px; font-weight: 700; color: var(--gray-600); letter-spacing: .8px; text-transform: uppercase; }
+  .driver-section { padding: 14px 16px 6px; font-size: 11px; font-weight: 700; color: var(--gray-600); letter-spacing: .8px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 
   .driver-card {
     background: white;
@@ -573,7 +1253,8 @@
   .driver-card.assigned { border-left-color: #4CAF50; }
   .driver-card:hover { box-shadow: var(--shadow-md); }
 
-  .driver-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .driver-card-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+  .driver-card-head-actions { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
   .driver-card-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
   .driver-card-code { font-size: 11px; color: var(--gray-400); }
 
@@ -582,9 +1263,11 @@
   .driver-card.assigned .driver-card-row i { color: var(--green-accent); }
 
   .driver-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--gray-200); }
+  .driver-actions { display: flex; align-items: center; gap: 8px; }
   .driver-value { font-weight: 800; font-size: 16px; color: var(--blue-primary); }
 
-  .btn-apply {
+  .btn-apply,
+  .btn-route {
     background: var(--blue-primary); color: white;
     border: none; border-radius: var(--radius-sm);
     padding: 9px 16px; font-size: 12px; font-weight: 700;
@@ -593,7 +1276,94 @@
     transition: all .2s;
   }
   .btn-apply:hover { background: var(--blue-dark); }
+  .btn-route {
+    background: var(--blue-soft);
+    color: var(--blue-primary);
+    border: 1.5px solid var(--blue-light);
+    padding: 7px 10px;
+  }
+  .btn-route:hover { background: var(--blue-primary); color: white; }
   .btn-applied { background: var(--green-light); color: var(--green-accent); border: 1.5px solid #A5D6A7; border-radius: var(--radius-sm); padding: 9px 16px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+
+  .route-detail-view {
+    display: none;
+    flex: 1;
+    min-height: 0;
+    background: var(--gray-100);
+    flex-direction: column;
+    position: relative;
+  }
+  #view-conductor.route-open .app-header,
+  #view-conductor.route-open .phone-shell > .map-container,
+  #view-conductor.route-open .driver-content,
+  #view-conductor.route-open .driver-bottom-nav {
+    display: none;
+  }
+  #view-conductor.route-open .route-detail-view { display: flex; }
+  .route-detail-header {
+    display: none;
+  }
+  .route-back-floating {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 12;
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(21,101,192,.92);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 22px rgba(13,71,161,.28);
+  }
+  .route-detail-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; }
+  .route-detail-sub { font-size: 11px; opacity: .78; margin-top: 1px; }
+  .route-full-map {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+    margin: 0;
+    border-radius: 0;
+    overflow: hidden;
+    box-shadow: none;
+  }
+  .route-full-map .map-eta-card {
+    left: auto;
+    right: 14px;
+    top: 14px;
+  }
+  .route-full-map .map-chip.pickup {
+    top: 100px;
+    left: 92px;
+  }
+  .route-full-map .map-chip.dropoff {
+    top: 290px;
+    right: 36px;
+  }
+  .route-info-card {
+    display: none;
+  }
+  .route-info-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--text-mid);
+    margin-bottom: 6px;
+  }
+  .route-info-row i { color: var(--blue-primary); width: 16px; }
+  .route-info-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--gray-200);
+    padding-top: 12px;
+    margin-top: 10px;
+  }
 
   /* Transition notification */
   .transition-notice {
@@ -625,7 +1395,7 @@
   .driver-chip .dc-dist { font-size: 10px; color: var(--gray-600); margin-top: 2px; }
 
   /* ── FAB POSTULAR TODOS ── */
-  .fab-postular-all { position: fixed; bottom: 28px; right: 28px; background: linear-gradient(135deg, var(--blue-primary), var(--blue-medium)); color: white; border: none; border-radius: 30px; padding: 13px 20px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 6px 24px rgba(21,101,192,.4); display: none; align-items: center; gap: 8px; z-index: 400; transition: transform .2s, box-shadow .2s; }
+  .fab-postular-all { position: absolute; bottom: 22px; right: 24px; background: linear-gradient(135deg, var(--blue-primary), var(--blue-medium)); color: white; border: none; border-radius: 30px; padding: 13px 20px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 6px 24px rgba(21,101,192,.4); display: none; align-items: center; gap: 8px; z-index: 20; transition: transform .2s, box-shadow .2s; }
   .fab-postular-all.show { display: flex; }
   .fab-postular-all:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(21,101,192,.5); }
   .fab-badge { background: white; color: var(--blue-primary); border-radius: 50%; width: 20px; height: 20px; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
@@ -657,6 +1427,113 @@
   .btn-close-modal { width: 100%; padding: 11px; background: var(--blue-primary); color: white; border: none; border-radius: var(--radius-sm); font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; margin-top: 16px; transition: background .2s; }
   .btn-close-modal:hover { background: var(--blue-dark); }
 
+  .ai-assign-box { width: 560px; max-width: 92vw; padding: 24px; }
+  .ai-assign-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+  .ai-assign-actions { display: flex; align-items: center; gap: 8px; }
+  .ai-modal-close {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: var(--gray-200);
+    color: var(--gray-600);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ai-assign-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--text-dark); }
+  .ai-assign-sub { font-size: 12px; color: var(--gray-600); margin-top: 3px; }
+  .ai-score {
+    background: linear-gradient(135deg, var(--blue-primary), var(--blue-light));
+    color: white;
+    border-radius: 16px;
+    padding: 10px 12px;
+    min-width: 86px;
+    text-align: center;
+    box-shadow: var(--shadow-md);
+  }
+  .ai-score strong { font-family: 'Syne', sans-serif; font-size: 22px; display: block; line-height: 1; }
+  .ai-score span { font-size: 10px; font-weight: 800; opacity: .9; }
+  .ai-assign-grid { display: grid; grid-template-columns: 1fr 190px; gap: 16px; align-items: stretch; }
+  .ai-brain-map {
+    min-height: 190px;
+    background:
+      radial-gradient(circle at 30% 25%, rgba(66,165,245,.22), transparent 22%),
+      linear-gradient(135deg, #EAF4FF, #F8FBFF);
+    border: 1px solid var(--blue-soft);
+    border-radius: var(--radius);
+    position: relative;
+    overflow: hidden;
+  }
+  .ai-brain-map::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(21,101,192,.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(21,101,192,.08) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+  .ai-node {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--blue-primary);
+    border: 3px solid white;
+    box-shadow: 0 6px 16px rgba(21,101,192,.28);
+    z-index: 2;
+    animation: mapPing 1.8s ease-out infinite;
+  }
+  .ai-line {
+    position: absolute;
+    height: 3px;
+    background: linear-gradient(90deg, var(--blue-primary), var(--green-neon));
+    border-radius: 999px;
+    transform-origin: left center;
+    opacity: .2;
+    z-index: 1;
+  }
+  .ai-line.lit { opacity: 1; box-shadow: 0 0 18px rgba(66,165,245,.35); }
+  .ai-assign-steps { display: flex; flex-direction: column; gap: 9px; }
+  .ai-assign-step {
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 10px;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--gray-600);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ai-assign-step.active { color: var(--blue-primary); border-color: var(--blue-light); background: var(--blue-xsoft); }
+  .ai-assign-step.done { color: var(--green-accent); border-color: #A5D6A7; background: var(--green-light); }
+  .ai-driver-options { display: none; margin-top: 16px; gap: 10px; }
+  .ai-driver-options.show { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .ai-driver-option {
+    border: 1.5px solid var(--blue-soft);
+    background: white;
+    border-radius: 14px;
+    padding: 12px 10px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: transform .2s, border-color .2s;
+  }
+  .ai-driver-option:hover { transform: translateY(-2px); border-color: var(--blue-primary); }
+  .ai-driver-option.selected {
+    border-color: var(--green-accent);
+    background: var(--green-light);
+    transform: translateY(-2px);
+  }
+  .ai-driver-option .dc-avatar { font-size: 24px; margin-bottom: 4px; }
+  .ai-driver-option .dc-name { font-size: 12px; font-weight: 800; color: var(--text-dark); }
+  .ai-driver-option .dc-stars { font-size: 10px; color: #FFA000; }
+  .ai-driver-option .dc-dist { font-size: 10px; color: var(--gray-600); margin-top: 2px; }
+
   /* Assigned tag */
   .card-assigned-tag { display: flex; align-items: center; gap: 6px; background: var(--green-light); border-radius: var(--radius-sm); padding: 7px 12px; font-size: 12px; font-weight: 700; color: var(--green-accent); margin-top: 10px; }
 
@@ -683,7 +1560,9 @@
      VISTA 1 — CLIENTE
 ═══════════════════════════════════ -->
 <div id="view-cliente" class="view active">
-  <div style="display:flex;justify-content:center;">
+  <div class="device-stage">
+    <div class="phone-frame">
+      <div class="phone-speaker"></div>
     <div class="phone-shell">
       <!-- App Header -->
       <div class="app-header">
@@ -770,7 +1649,7 @@
         </div>
 
         <!-- Order form card -->
-        <div class="order-card" id="order-card" style="margin:0 12px 10px;">
+        <div class="order-card" id="order-card" style="margin:0 12px 18px;">
           <h4><i class="fa-solid fa-box"></i> Solicitar domicilio</h4>
           <div class="order-field">
             <label>📍 Dirección de recogida</label>
@@ -802,6 +1681,7 @@
       </div>
 
     </div>
+    </div>
   </div>
 </div>
 
@@ -809,6 +1689,31 @@
      VISTA 2 — OPERADOR
 ═══════════════════════════════════ -->
 <div id="view-operador" class="view">
+  <div class="monitor-stage">
+    <div class="desktop-device">
+      <div class="desktop-camera"></div>
+      <div class="desktop-screen">
+        <aside class="op-sidebar" id="op-sidebar">
+          <div class="op-side-head">
+            <div class="op-side-logo"><i class="fa-solid fa-route"></i></div>
+            <div class="op-side-title-wrap">
+              <div class="op-side-title">AntRouter</div>
+              <div class="op-side-sub">Operador IA</div>
+            </div>
+            <button class="op-side-toggle" onclick="toggleOpSidebar()"><i class="fa-solid fa-chevron-left"></i></button>
+          </div>
+          <div class="op-menu">
+            <button class="op-menu-btn active" data-op-tab="servicios" onclick="showOperatorModule('servicios')"><i class="fa-solid fa-boxes-stacked"></i><span>Servicios</span></button>
+            <button class="op-menu-btn" data-op-tab="mapa" onclick="showOperatorModule('mapa')"><i class="fa-solid fa-map-location-dot"></i><span>Mapa</span></button>
+            <button class="op-menu-btn" data-op-tab="chat" onclick="showOperatorModule('chat')"><i class="fa-regular fa-comments"></i><span>Chat</span></button>
+            <button class="op-menu-btn disabled"><i class="fa-solid fa-motorcycle"></i><span>Conductores</span></button>
+            <button class="op-menu-btn disabled"><i class="fa-solid fa-users"></i><span>Clientes</span></button>
+            <button class="op-menu-btn disabled"><i class="fa-regular fa-calendar"></i><span>Horarios</span></button>
+            <button class="op-menu-btn disabled"><i class="fa-solid fa-gear"></i><span>Ajustes</span></button>
+            <button class="op-menu-btn disabled"><i class="fa-regular fa-user"></i><span>Perfil</span></button>
+          </div>
+        </aside>
+        <div class="op-main">
   <!-- Top bar -->
   <div class="op-topbar">
     <div class="logo">Ant<span>Router</span> AI</div>
@@ -821,7 +1726,7 @@
     </div>
   </div>
 
-  <div class="op-layout">
+  <div class="op-layout op-view active" id="op-view-servicios">
     <!-- LEFT: Pedidos -->
     <div>
       <div class="col-header">
@@ -940,18 +1845,25 @@
         </div>
       </div>
 
-      <!-- WhatsApp processor -->
+      <!-- Operations pulse -->
       <div class="panel-card">
-        <div class="panel-card-title"><i class="fa-brands fa-whatsapp" style="color:#25D366;"></i> Procesar desde WhatsApp</div>
-        <p style="font-size:12px;color:var(--gray-600);margin-bottom:10px;">Pega el mensaje del cliente y la IA armará la tarjeta automáticamente.</p>
-        <textarea class="whatsapp-area" id="wa-input" placeholder="Ej: Hola buenas, necesito un domicilio de la Cra 5 #10-20 hasta el Centro Comercial Guatapurí, es una cajita pequeña con documentos. Gracias"></textarea>
-        <div class="ai-processing" id="wa-processing">
-          <div class="ai-spinner"></div>
-          <p>IA procesando mensaje...</p>
+        <div class="panel-card-title"><i class="fa-solid fa-satellite-dish"></i> Pulso operativo IA</div>
+        <div class="ops-list">
+          <div class="ops-row">
+            <div><strong>Cola prioritaria</strong><span>Servicios con mejor ventana de asignación</span></div>
+            <div class="ops-pill">3 ahora</div>
+          </div>
+          <div class="ops-row">
+            <div><strong>Cobertura cercana</strong><span>Mensajeros a menos de 1 km</span></div>
+            <div class="ops-pill">2 libres</div>
+          </div>
+          <div class="ops-row">
+            <div><strong>SLA estimado</strong><span>Tiempo promedio de aceptación</span></div>
+            <div class="ops-pill">4.2 min</div>
+          </div>
         </div>
-        <button class="btn-process-ai" onclick="processWhatsapp()">
-          <i class="fa-solid fa-robot"></i> Procesar con IA
-        </button>
+        <div class="ops-meter"><span></span></div>
+        <p style="font-size:11px;color:var(--gray-600);line-height:1.55;margin-top:10px;">La IA recomienda postular primero servicios urgentes cerca de Clínica del Cesar y Centro.</p>
       </div>
 
       <!-- Go to conductor -->
@@ -965,13 +1877,98 @@
 
     </div>
   </div>
+  <div class="op-map-view op-view" id="op-view-mapa">
+    <div class="op-map-panel">
+      <div class="op-map-head">
+        <div>
+          <div class="col-title">Mapa de mensajeros</div>
+          <div class="col-sub">Ubicación simulada de conductores activos y servicios cercanos</div>
+        </div>
+        <div class="ai-live" style="color:var(--blue-primary);font-weight:700;">
+          <div class="dot"></div>
+          Actualizando en vivo
+        </div>
+      </div>
+      <div class="op-map-canvas map-container">
+        <div class="map-grid"></div>
+        <div class="map-block" style="top:34px;left:36px;width:126px;height:86px;"></div>
+        <div class="map-block" style="top:156px;left:214px;width:136px;height:110px;"></div>
+        <div class="map-block" style="bottom:44px;left:96px;width:158px;height:92px;"></div>
+        <div class="map-block" style="top:72px;right:80px;width:150px;height:96px;"></div>
+        <div class="map-artery" style="top:122px;left:-36px;width:520px;transform:rotate(0deg);"></div>
+        <div class="map-artery" style="top:260px;left:180px;width:520px;transform:rotate(-21deg);"></div>
+        <div class="map-artery" style="top:390px;left:-60px;width:460px;transform:rotate(0deg);"></div>
+        <div class="map-minor-road" style="top:74px;left:210px;width:260px;transform:rotate(18deg);"></div>
+        <div class="map-minor-road" style="top:208px;left:22px;width:300px;transform:rotate(-14deg);"></div>
+        <div class="map-minor-road" style="top:338px;left:330px;width:260px;transform:rotate(14deg);"></div>
+        <div class="map-road-v" style="left:170px;top:-20px;bottom:-20px;"></div>
+        <div class="map-road-v" style="left:430px;top:-20px;bottom:-20px;"></div>
+        <div class="map-road-h" style="top:206px;left:-20px;right:-20px;"></div>
+        <div class="courier-dot" style="top:76px;left:300px;"></div>
+        <div class="courier-dot" style="top:330px;left:138px;animation-delay:.5s;"></div>
+        <div class="courier-dot" style="top:174px;right:96px;animation-delay:1s;"></div>
+        <div class="courier-marker available moving-a" style="top:92px;left:148px;"><span class="cm-icon"><i class="fa-solid fa-motorcycle"></i></span><span>Carlos M.<small>Disponible · 0.3 km</small></span></div>
+        <div class="courier-marker busy moving-b" style="top:282px;left:392px;"><span class="cm-icon"><i class="fa-solid fa-motorcycle"></i></span><span>Luis R.<small>En servicio · 8 min</small></span></div>
+        <div class="courier-marker available" style="bottom:118px;left:238px;"><span class="cm-icon"><i class="fa-solid fa-motorcycle"></i></span><span>Andrés P.<small>Disponible · 0.9 km</small></span></div>
+        <div class="courier-marker offline" style="top:126px;right:110px;"><span class="cm-icon"><i class="fa-solid fa-motorcycle"></i></span><span>MotoFast 4<small>Pausado</small></span></div>
+        <div class="courier-marker available moving-b" style="bottom:58px;right:86px;"><span class="cm-icon"><i class="fa-solid fa-motorcycle"></i></span><span>Rosa T.<small>Disponible · 1.1 km</small></span></div>
+        <div class="courier-marker busy" style="top:210px;left:72px;"><span class="cm-icon"><i class="fa-solid fa-motorcycle"></i></span><span>Diego L.<small>Recogiendo paquete</small></span></div>
+      </div>
+    </div>
+    <div class="op-map-stats">
+      <div class="panel-card">
+        <div class="panel-card-title"><i class="fa-solid fa-motorcycle"></i> Mensajeros</div>
+        <div class="stats-row">
+          <div class="stat-box"><div class="stat-num">5</div><div class="stat-label">Activos</div></div>
+          <div class="stat-box"><div class="stat-num">3</div><div class="stat-label">Libres</div></div>
+        </div>
+      </div>
+      <div class="panel-card">
+        <div class="panel-card-title"><i class="fa-solid fa-route"></i> Zonas calientes</div>
+        <p style="font-size:12px;color:var(--gray-600);line-height:1.6;">Centro, Novalito y clínicas concentran más solicitudes en esta simulación.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="op-chat-view op-view" id="op-view-chat">
+    <div class="op-chat-shell">
+      <div class="op-chat-list" id="op-chat-list"></div>
+      <div class="op-chat-main">
+        <div class="op-chat-head">
+          <div>
+            <div class="col-title" id="op-chat-title">Rapidex Express</div>
+            <div class="col-sub" id="op-chat-sub">Conversación enlazada con cliente</div>
+          </div>
+          <span class="status-badge badge-new">En línea</span>
+        </div>
+        <div class="op-chat-messages" id="op-chat-messages"></div>
+        <div class="op-chat-input">
+          <input id="op-chat-input" type="text" placeholder="Responder al cliente..." onkeydown="handleOperatorChatKey(event)">
+          <button class="btn-postular" onclick="sendOperatorMsg()"><i class="fa-solid fa-paper-plane"></i> Enviar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+        </div>
+        <button class="fab-postular-all" id="fab-all" onclick="openModalAll()">
+          <i class="fa-solid fa-robot"></i>
+          Postular todos
+          <span class="fab-badge" id="fab-count">3</span>
+        </button>
+      </div>
+    </div>
+    <div class="monitor-neck"></div>
+    <div class="monitor-base"></div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════
      VISTA 3 — CONDUCTOR
 ═══════════════════════════════════ -->
 <div id="view-conductor" class="view">
-  <div style="display:flex;justify-content:center;">
+  <div class="device-stage">
+    <div class="phone-frame">
+      <div class="phone-speaker"></div>
     <div class="phone-shell">
 
       <!-- App Header -->
@@ -979,7 +1976,7 @@
         <div class="logo-mark"><i class="fa-solid fa-motorcycle"></i></div>
         <div>
           <div class="app-title">AntRouter <span style="color:#90CAF9;font-size:14px;">AI</span></div>
-          <div class="app-sub">Panel Conductor</div>
+          <div class="app-sub">Carlos M. · Conductor activo</div>
         </div>
         <div class="header-right">
           <i class="fa-solid fa-bell"></i>
@@ -989,21 +1986,63 @@
 
       <!-- Map -->
       <div class="map-container">
+        <button class="map-toggle" id="driver-map-toggle" onclick="toggleDriverMap()">
+          <i class="fa-solid fa-map-location-dot"></i>
+          <span>Ocultar mapa</span>
+        </button>
         <div class="map-grid"></div>
-        <div class="map-road-h" style="top:70px;left:0;right:0;"></div>
-        <div class="map-road-h" style="top:110px;left:0;right:0;"></div>
-        <div class="map-road-v" style="left:80px;top:0;bottom:0;"></div>
-        <div class="map-road-v" style="left:200px;top:0;bottom:0;"></div>
-        <div class="map-road-v" style="left:300px;top:0;bottom:0;"></div>
-        <div class="map-route-line"></div>
+        <div class="map-block" style="top:18px;left:18px;width:86px;height:44px;"></div>
+        <div class="map-block" style="top:84px;left:104px;width:74px;height:52px;"></div>
+        <div class="map-block" style="top:132px;left:214px;width:76px;height:46px;"></div>
+        <div class="map-minor-road" style="top:28px;left:118px;width:96px;transform:rotate(18deg);"></div>
+        <div class="map-minor-road" style="top:92px;left:18px;width:132px;transform:rotate(-12deg);"></div>
+        <div class="map-minor-road" style="top:186px;left:166px;width:130px;transform:rotate(18deg);"></div>
+        <div class="map-artery" style="top:76px;left:-26px;width:220px;transform:rotate(0deg);"></div>
+        <div class="map-artery" style="top:132px;left:132px;width:230px;transform:rotate(-22deg);"></div>
+        <div class="map-zone" style="top:52px;left:126px;">Centro</div>
+        <div class="map-zone" style="top:118px;left:184px;">Novalito</div>
+        <div class="map-zone" style="bottom:18px;left:78px;">Los Cortijos</div>
+        <div class="map-road-h" style="top:62px;left:-24px;right:34px;"></div>
+        <div class="map-road-h" style="top:112px;left:18px;right:-26px;"></div>
+        <div class="map-road-h" style="top:164px;left:-12px;right:20px;"></div>
+        <div class="map-road-v" style="left:78px;top:-20px;bottom:18px;"></div>
+        <div class="map-road-v" style="left:190px;top:16px;bottom:-20px;"></div>
+        <div class="map-road-v" style="left:300px;top:-16px;bottom:8px;"></div>
+        <div class="map-road-diag" style="top:42px;left:-18px;width:214px;transform:rotate(22deg);"></div>
+        <div class="map-road-diag" style="top:148px;left:144px;width:220px;transform:rotate(-24deg);"></div>
+        <div class="map-route-line">
+          <svg viewBox="0 0 225 74" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id="routeGradient" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0%" stop-color="#1565C0"/>
+                <stop offset="58%" stop-color="#42A5F5"/>
+                <stop offset="100%" stop-color="#E53935"/>
+              </linearGradient>
+            </defs>
+            <path class="route-shadow" d="M4 10 C54 18 58 62 106 55 S166 18 220 45"/>
+            <path class="route-main" d="M4 10 C54 18 58 62 106 55 S166 18 220 45"/>
+          </svg>
+        </div>
         <div class="map-pin origin"><i class="fa-solid fa-location-dot"></i></div>
         <div class="map-pin dest"><i class="fa-solid fa-flag-checkered"></i></div>
+        <div class="map-moto"><i class="fa-solid fa-motorcycle"></i></div>
+        <div class="map-chip pickup">Recogida<small>Cra 12 #14-30</small></div>
+        <div class="map-chip dropoff">Entrega<small>Palma Real</small></div>
+        <div class="map-eta-card">
+          <div class="map-eta-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Ruta IA</div>
+          <div class="map-eta-meta"><strong>8 min</strong> · conductor cercano</div>
+        </div>
         <div class="map-overlay"><i class="fa-solid fa-route"></i> 2.3 km · ~8 min</div>
       </div>
 
       <!-- Content -->
       <div class="driver-content" id="driver-content">
-        <div class="driver-section">Servicios disponibles</div>
+        <div class="driver-section">
+          <span>Servicios disponibles</span>
+          <button class="map-toggle-inline" onclick="toggleDriverMap()">
+            <i class="fa-solid fa-map-location-dot"></i> Mostrar mapa
+          </button>
+        </div>
 
         <div class="driver-card" id="drv-card-1">
           <div class="driver-card-header">
@@ -1011,16 +2050,23 @@
               <div class="driver-card-title" id="drv-title-1">Rapidex Express</div>
               <div class="driver-card-code" id="drv-code-1">SRV-00127</div>
             </div>
-            <span class="status-badge badge-new">Entrante</span>
+            <div class="driver-card-head-actions">
+              <button class="btn-route" onclick="openRouteDetail(1)">
+                <i class="fa-solid fa-map-location-dot"></i> Ruta
+              </button>
+              <span class="status-badge badge-new">Entrante</span>
+            </div>
           </div>
           <div class="driver-card-row"><i class="fa-solid fa-location-dot"></i> <span id="drv-origen-1">Cra 12 #14-30</span></div>
           <div class="driver-card-row"><i class="fa-solid fa-flag-checkered"></i> <span id="drv-destino-1">Conjunto Palma Real</span></div>
           <div class="driver-card-row"><i class="fa-solid fa-box"></i> <span id="drv-desc-1">Documentos</span></div>
           <div class="driver-card-footer">
             <div class="driver-value">$13.000</div>
-            <button class="btn-apply" id="apply-btn-1" onclick="applyService(1)">
-              <i class="fa-solid fa-hand-pointer"></i> Postularme
-            </button>
+            <div class="driver-actions">
+              <button class="btn-apply" id="apply-btn-1" onclick="applyService(1)">
+                <i class="fa-solid fa-hand-pointer"></i> Postularme
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1030,22 +2076,93 @@
               <div class="driver-card-title">Los Cortijos</div>
               <div class="driver-card-code">SRV-00125</div>
             </div>
-            <span class="status-badge badge-new">Entrante</span>
+            <div class="driver-card-head-actions">
+              <button class="btn-route" onclick="openRouteDetail(2)">
+                <i class="fa-solid fa-map-location-dot"></i> Ruta
+              </button>
+              <span class="status-badge badge-new">Entrante</span>
+            </div>
           </div>
           <div class="driver-card-row"><i class="fa-solid fa-location-dot"></i> Calle 16 #9-40</div>
           <div class="driver-card-row"><i class="fa-solid fa-flag-checkered"></i> Clínica del Cesar</div>
           <div class="driver-card-row"><i class="fa-solid fa-box"></i> Medicamentos urgentes</div>
           <div class="driver-card-footer">
             <div class="driver-value">$15.000</div>
-            <button class="btn-apply" id="apply-btn-2" onclick="applyService(2)">
-              <i class="fa-solid fa-hand-pointer"></i> Postularme
-            </button>
+            <div class="driver-actions">
+              <button class="btn-apply" id="apply-btn-2" onclick="applyService(2)">
+                <i class="fa-solid fa-hand-pointer"></i> Postularme
+              </button>
+            </div>
           </div>
         </div>
 
         <div class="driver-section" id="assigned-section" style="display:none;">Mis servicios asignados</div>
         <div id="assigned-cards"></div>
 
+      </div>
+
+      <!-- Full route view -->
+      <div class="route-detail-view" id="route-detail-view">
+        <button class="route-back-floating" onclick="closeRouteDetail()">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+
+        <div class="route-full-map map-container">
+          <div class="map-grid"></div>
+          <div class="map-block" style="top:34px;left:18px;width:86px;height:74px;"></div>
+          <div class="map-block" style="top:118px;left:122px;width:86px;height:82px;"></div>
+          <div class="map-block" style="top:240px;left:34px;width:86px;height:96px;"></div>
+          <div class="map-block" style="top:286px;left:210px;width:92px;height:90px;"></div>
+          <div class="map-minor-road" style="top:46px;left:124px;width:128px;transform:rotate(18deg);"></div>
+          <div class="map-minor-road" style="top:132px;left:18px;width:148px;transform:rotate(-13deg);"></div>
+          <div class="map-minor-road" style="top:206px;left:170px;width:156px;transform:rotate(16deg);"></div>
+          <div class="map-minor-road" style="top:348px;left:64px;width:176px;transform:rotate(-22deg);"></div>
+          <div class="map-artery" style="top:116px;left:-32px;width:248px;transform:rotate(0deg);"></div>
+          <div class="map-artery" style="top:210px;left:128px;width:276px;transform:rotate(-25deg);"></div>
+          <div class="map-artery" style="top:318px;left:-34px;width:270px;transform:rotate(0deg);"></div>
+          <div class="map-road-h" style="top:82px;left:-24px;right:34px;"></div>
+          <div class="map-road-h" style="top:158px;left:18px;right:-26px;"></div>
+          <div class="map-road-h" style="top:244px;left:-12px;right:20px;"></div>
+          <div class="map-road-v" style="left:78px;top:-20px;bottom:18px;"></div>
+          <div class="map-road-v" style="left:190px;top:16px;bottom:-20px;"></div>
+          <div class="map-road-v" style="left:300px;top:-16px;bottom:8px;"></div>
+          <div class="map-road-diag" style="top:72px;left:-18px;width:250px;transform:rotate(24deg);"></div>
+          <div class="map-road-diag" style="top:226px;left:116px;width:270px;transform:rotate(-25deg);"></div>
+          <div class="map-route-line" style="top:132px;left:58px;width:232px;height:190px;">
+            <svg viewBox="0 0 232 190" aria-hidden="true" focusable="false">
+              <defs>
+                <linearGradient id="routeGradientFull" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0%" stop-color="#1565C0"/>
+                  <stop offset="58%" stop-color="#42A5F5"/>
+                  <stop offset="100%" stop-color="#E53935"/>
+                </linearGradient>
+              </defs>
+              <path class="route-shadow" d="M8 24 C42 8 62 56 88 78 S128 96 152 82 S176 94 186 126 S200 168 224 154"/>
+              <path class="route-main" style="stroke:url(#routeGradientFull)" d="M8 24 C42 8 62 56 88 78 S128 96 152 82 S176 94 186 126 S200 168 224 154"/>
+            </svg>
+          </div>
+          <div class="map-pin origin" style="top:146px;left:38px;"><i class="fa-solid fa-location-dot"></i></div>
+          <div class="map-pin dest" style="top:282px;left:268px;"><i class="fa-solid fa-flag-checkered"></i></div>
+          <div class="map-moto" style="top:216px;left:158px;"><i class="fa-solid fa-motorcycle"></i></div>
+          <div class="map-chip pickup" id="route-pickup-chip">Recogida<small>Cra 12 #14-30</small></div>
+          <div class="map-chip dropoff" id="route-dropoff-chip">Entrega<small>Palma Real</small></div>
+          <div class="map-eta-card">
+            <div class="map-eta-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Ruta IA</div>
+            <div class="map-eta-meta"><strong id="route-eta">8 min</strong> · <span id="route-distance">2.3 km</span></div>
+          </div>
+        </div>
+
+        <div class="route-info-card">
+          <div class="route-info-row"><i class="fa-solid fa-location-dot"></i> <span id="route-origin">Cra 12 #14-30</span></div>
+          <div class="route-info-row"><i class="fa-solid fa-flag-checkered"></i> <span id="route-destination">Conjunto Palma Real</span></div>
+          <div class="route-info-row"><i class="fa-solid fa-box"></i> <span id="route-package">Documentos</span></div>
+          <div class="route-info-footer">
+            <div class="driver-value" id="route-price">$13.000</div>
+            <button class="btn-apply" id="route-apply-btn" onclick="applyService(1)">
+              <i class="fa-solid fa-hand-pointer"></i> Postularme
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Bottom Nav -->
@@ -1057,15 +2174,48 @@
       </div>
 
     </div>
+    </div>
   </div>
 </div>
 
-<!-- ═══════════ FAB POSTULAR TODOS ═══════════ -->
-<button class="fab-postular-all" id="fab-all" onclick="openModalAll()">
-  <i class="fa-solid fa-robot"></i>
-  Postular todos
-  <span class="fab-badge" id="fab-count">3</span>
-</button>
+<!-- ═══════════ MODAL ASIGNACION IA ═══════════ -->
+<div class="modal-overlay" id="ai-assign-modal">
+  <div class="modal-box ai-assign-box">
+    <div class="ai-assign-head">
+      <div>
+        <div class="ai-assign-title">Asignación inteligente</div>
+        <div class="ai-assign-sub" id="ai-assign-sub">Analizando servicio y mensajeros cercanos...</div>
+      </div>
+      <div class="ai-assign-actions">
+        <div class="ai-score">
+          <strong id="ai-score-value">--</strong>
+          <span>match IA</span>
+        </div>
+        <button class="ai-modal-close" onclick="closeAssignModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+
+    <div class="ai-assign-grid">
+      <div class="ai-brain-map" id="ai-brain-map">
+        <div class="ai-node" style="top:34px;left:42px;"></div>
+        <div class="ai-node" style="top:128px;left:108px;background:#F57F17;"></div>
+        <div class="ai-node" style="top:64px;right:58px;background:#2E7D32;"></div>
+        <div class="ai-node" style="bottom:28px;right:96px;background:#E53935;"></div>
+        <div class="ai-line" id="ai-line-1" style="top:46px;left:56px;width:178px;transform:rotate(9deg);"></div>
+        <div class="ai-line" id="ai-line-2" style="top:92px;left:112px;width:134px;transform:rotate(-28deg);"></div>
+        <div class="ai-line" id="ai-line-3" style="top:140px;left:122px;width:118px;transform:rotate(16deg);"></div>
+      </div>
+      <div class="ai-assign-steps">
+        <div class="ai-assign-step" id="ai-step-1"><i class="fa-solid fa-circle-notch fa-spin"></i> Leyendo prioridad</div>
+        <div class="ai-assign-step" id="ai-step-2"><i class="fa-solid fa-location-crosshairs"></i> Midiendo cercanía</div>
+        <div class="ai-assign-step" id="ai-step-3"><i class="fa-solid fa-brain"></i> Comparando desempeño</div>
+        <div class="ai-assign-step" id="ai-step-4"><i class="fa-solid fa-user-check"></i> Sugerencia lista</div>
+      </div>
+    </div>
+
+    <div class="ai-driver-options" id="ai-driver-options"></div>
+  </div>
+</div>
 
 <!-- ═══════════ MODAL POSTULAR TODOS ═══════════ -->
 <div class="modal-overlay" id="modal-all">
@@ -1114,7 +2264,8 @@ function showView(name) {
   window.scrollTo(0,0);
   // Show FAB only on operador view
   const fab = document.getElementById('fab-all');
-  fab.classList.toggle('show', name === 'operador');
+  const servicesActive = document.getElementById('op-view-servicios')?.classList.contains('active');
+  fab.classList.toggle('show', name === 'operador' && servicesActive && pendingCount > 0);
 }
 
 function showNotice(text, duration = 2500) {
@@ -1133,6 +2284,13 @@ const companies = {
   motofast:{ name: 'MotoFast Courier', avatar: '🛵', greeting: '¡Hola! Soy el asistente IA de MotoFast 🛵 Tu pedido es nuestra prioridad. ¿Cómo te puedo ayudar hoy?' }
 };
 
+const sharedChats = {
+  rapidex: { messages: [{ from: 'operator', text: 'Hola, ¿en qué te puedo ayudar hoy?' }] },
+  veloz: { messages: [{ from: 'operator', text: 'Bienvenido a Veloz, ¿cómo te ayudamos?' }] },
+  motofast: { messages: [{ from: 'operator', text: 'Tu pedido es nuestra prioridad.' }] }
+};
+let currentOperatorChat = 'rapidex';
+
 const aiResponses = [
   '¡Entendido! Puedo ayudarte con eso. Para continuar, usa el botón <strong>📦 Pedir</strong> y completa los datos de tu domicilio.',
   'Claro que sí 😊 Puedo procesar tu pedido de inmediato. ¿Usas el formulario de domicilio?',
@@ -1146,6 +2304,7 @@ let msgCount = 0;
 function openChat(company) {
   currentCompany = company;
   const c = companies[company];
+  document.getElementById('view-cliente').classList.add('chat-active');
   document.getElementById('ch-name').textContent = c.name;
   document.getElementById('ch-avatar').textContent = c.avatar;
   const msgs = document.getElementById('chat-messages');
@@ -1155,10 +2314,11 @@ function openChat(company) {
   const win = document.getElementById('chat-window');
   win.classList.add('open');
   msgCount = 0;
-  setTimeout(() => addMsg('bot', c.greeting), 400);
+  setTimeout(() => renderClientSharedChat(company), 250);
 }
 
 function closeChat() {
+  document.getElementById('view-cliente').classList.remove('chat-active');
   document.getElementById('chat-window').classList.remove('open');
   document.getElementById('chat-list-view').style.display = 'flex';
   document.getElementById('order-card').classList.remove('show');
@@ -1173,6 +2333,17 @@ function addMsg(type, text) {
   div.innerHTML = `<div class="msg-bubble">${text}</div><div class="msg-time">${time}</div>`;
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
+}
+
+function renderClientSharedChat(company) {
+  const msgs = document.getElementById('chat-messages');
+  msgs.innerHTML = '';
+  const history = sharedChats[company]?.messages || [];
+  if (!history.length) {
+    addMsg('bot', companies[company].greeting);
+    return;
+  }
+  history.forEach(m => addMsg(m.from === 'client' ? 'user' : 'bot', m.text));
 }
 
 function showTyping() {
@@ -1193,6 +2364,7 @@ function sendUserMsg() {
   const text = inp.value.trim();
   if (!text) return;
   addMsg('user', text);
+  addSharedChatMessage(currentCompany || 'rapidex', 'client', text, { syncClient: false });
   inp.value = '';
   showTyping();
   const resp = aiResponses[msgCount % aiResponses.length];
@@ -1222,6 +2394,7 @@ function confirmOrder() {
 
   document.getElementById('order-card').classList.remove('show');
   addMsg('user', `📦 Pedido: ${origen} → ${destino} (${desc})`);
+  addSharedChatMessage(company, 'client', `📦 Pedido: ${origen} → ${destino} (${desc})`, { syncClient: false });
   showTyping();
 
   // Save to operator card
@@ -1269,16 +2442,104 @@ function toggleAuto() {
   t.classList.toggle('on', autoToggleOn);
 }
 
+function toggleOpSidebar() {
+  const sidebar = document.getElementById('op-sidebar');
+  sidebar.classList.toggle('collapsed');
+  const icon = sidebar.querySelector('.op-side-toggle i');
+  if (icon) icon.className = sidebar.classList.contains('collapsed') ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left';
+}
+
+function showOperatorModule(name) {
+  document.querySelectorAll('.op-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.op-menu-btn[data-op-tab]').forEach(b => b.classList.remove('active'));
+  const view = document.getElementById('op-view-' + name);
+  const btn = document.querySelector(`.op-menu-btn[data-op-tab="${name}"]`);
+  if (view) view.classList.add('active');
+  if (btn) btn.classList.add('active');
+  const fab = document.getElementById('fab-all');
+  if (fab) fab.classList.toggle('show', name === 'servicios' && pendingCount > 0 && document.getElementById('view-operador').classList.contains('active'));
+  if (name === 'chat') renderOperatorChat();
+}
+
+function addSharedChatMessage(company, from, text, options = {}) {
+  if (!sharedChats[company]) sharedChats[company] = { messages: [] };
+  sharedChats[company].messages.push({ from, text });
+  renderOperatorChat();
+  const shouldSyncClient = options.syncClient !== false;
+  const clientChatOpen = document.getElementById('chat-window').classList.contains('open');
+  if (shouldSyncClient && clientChatOpen && currentCompany === company) {
+    renderClientSharedChat(company);
+  }
+}
+
+function renderOperatorChatList() {
+  const list = document.getElementById('op-chat-list');
+  if (!list) return;
+  list.innerHTML = '';
+  Object.keys(companies).forEach(key => {
+    const c = companies[key];
+    const messages = sharedChats[key]?.messages || [];
+    const last = messages[messages.length - 1]?.text || 'Sin mensajes recientes';
+    const item = document.createElement('div');
+    item.className = 'op-chat-item' + (key === currentOperatorChat ? ' active' : '');
+    item.onclick = () => { currentOperatorChat = key; renderOperatorChat(); };
+    item.innerHTML = `<div class="op-chat-avatar">${c.avatar}</div><div><div class="op-chat-title">${c.name}</div><div class="op-chat-preview"></div></div>`;
+    item.querySelector('.op-chat-preview').textContent = last;
+    list.appendChild(item);
+  });
+}
+
+function renderOperatorChatMessages() {
+  const box = document.getElementById('op-chat-messages');
+  if (!box) return;
+  const c = companies[currentOperatorChat];
+  document.getElementById('op-chat-title').textContent = c.name;
+  document.getElementById('op-chat-sub').textContent = 'Conversación enlazada con cliente';
+  box.innerHTML = '';
+  const messages = sharedChats[currentOperatorChat]?.messages || [];
+  messages.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'op-msg ' + (m.from === 'client' ? 'client' : 'operator');
+    div.textContent = m.text;
+    box.appendChild(div);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+
+function renderOperatorChat() {
+  renderOperatorChatList();
+  renderOperatorChatMessages();
+}
+
+function handleOperatorChatKey(e) {
+  if (e.key === 'Enter') sendOperatorMsg();
+}
+
+function sendOperatorMsg() {
+  const inp = document.getElementById('op-chat-input');
+  if (!inp) return;
+  const text = inp.value.trim();
+  if (!text) return;
+  addSharedChatMessage(currentOperatorChat, 'operator', text);
+  inp.value = '';
+}
+
 const driverPool = [
   { avatar: '🧑', name: 'Carlos M.', stars: '⭐ 4.9', dist: '0.3 km' },
   { avatar: '👨', name: 'Luis R.',   stars: '⭐ 4.7', dist: '0.6 km' },
   { avatar: '🧔', name: 'Andrés P.', stars: '⭐ 4.8', dist: '0.9 km' },
 ];
+const activeDriverName = 'Carlos M.';
 
 function postularCard(cardId, btnId, animId) {
   const btn  = document.getElementById(btnId);
   const anim = document.getElementById(animId);
   const card = cardId ? document.getElementById(cardId) : btn.closest('.srv-card');
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Analizando...';
+  openAssignModal(card, btn, animId);
+  return;
 
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Analizando...';
@@ -1339,6 +2600,158 @@ function postularCard(cardId, btnId, animId) {
       row.dataset.autoTimer = autoTimer;
     }
   }, 2700);
+}
+
+let activeAssignContext = null;
+let assignAutoTimer = null;
+
+function openAssignModal(card, btn, animId) {
+  activeAssignContext = { card, btn, animId };
+  if (assignAutoTimer) clearTimeout(assignAutoTimer);
+  const modal = document.getElementById('ai-assign-modal');
+  const options = document.getElementById('ai-driver-options');
+  document.getElementById('ai-score-value').textContent = '--';
+  document.getElementById('ai-assign-sub').textContent = 'Analizando servicio y mensajeros cercanos...';
+  options.classList.remove('show');
+  options.innerHTML = '';
+  document.querySelectorAll('.ai-assign-step').forEach((step, i) => {
+    step.classList.remove('active', 'done');
+    step.querySelector('i').className = i === 0 ? 'fa-solid fa-circle-notch fa-spin' : ['fa-solid fa-location-crosshairs','fa-solid fa-brain','fa-solid fa-user-check'][i - 1];
+  });
+  document.querySelectorAll('.ai-line').forEach(line => line.classList.remove('lit'));
+  modal.classList.add('show');
+  runAssignSimulation();
+}
+
+function runAssignSimulation() {
+  const steps = [
+    { id: 'ai-step-1', line: 'ai-line-1', score: '42' },
+    { id: 'ai-step-2', line: 'ai-line-2', score: '68' },
+    { id: 'ai-step-3', line: 'ai-line-3', score: '91' },
+    { id: 'ai-step-4', score: '96' },
+  ];
+  steps.forEach((item, index) => {
+    setTimeout(() => {
+      const step = document.getElementById(item.id);
+      step.classList.add('active');
+      document.getElementById('ai-score-value').textContent = item.score;
+      if (item.line) document.getElementById(item.line).classList.add('lit');
+      setTimeout(() => {
+        step.classList.remove('active');
+        step.classList.add('done');
+        step.querySelector('i').className = 'fa-solid fa-check-circle';
+        if (index === steps.length - 1) showAssignDrivers();
+      }, 520);
+    }, index * 720);
+  });
+}
+
+function showAssignDrivers() {
+  document.getElementById('ai-assign-sub').textContent = 'Selecciona el mensajero recomendado por la IA.';
+  const options = document.getElementById('ai-driver-options');
+  options.innerHTML = driverPool.map((d, i) => `
+    <button class="ai-driver-option" onclick="assignDriverFromModal('${d.name}', ${i === 0})">
+      <div class="dc-avatar">${d.avatar}</div>
+      <div class="dc-name">${d.name}</div>
+      <div class="dc-stars">${d.stars}</div>
+      <div class="dc-dist">${d.dist}</div>
+    </button>`).join('');
+  options.classList.add('show');
+  assignAutoTimer = setTimeout(() => {
+    const first = options.querySelector('.ai-driver-option');
+    if (first) first.classList.add('selected');
+    document.getElementById('ai-assign-sub').textContent = 'IA seleccionó automáticamente al mejor mensajero.';
+    setTimeout(() => assignDriverFromModal(driverPool[0].name, true), 900);
+  }, 2800);
+}
+
+function assignDriverFromModal(name, recommended = false) {
+  if (!activeAssignContext) return;
+  if (assignAutoTimer) {
+    clearTimeout(assignAutoTimer);
+    assignAutoTimer = null;
+  }
+  const { card, btn, animId } = activeAssignContext;
+  completeAssignment(card, btn, animId, name, recommended);
+  document.getElementById('ai-assign-modal').classList.remove('show');
+  activeAssignContext = null;
+}
+
+function closeAssignModal() {
+  document.getElementById('ai-assign-modal').classList.remove('show');
+  if (assignAutoTimer) {
+    clearTimeout(assignAutoTimer);
+    assignAutoTimer = null;
+  }
+  if (activeAssignContext?.btn) {
+    activeAssignContext.btn.disabled = false;
+    activeAssignContext.btn.innerHTML = '<i class="fa-solid fa-robot"></i> Postular con IA';
+  }
+  activeAssignContext = null;
+}
+
+function completeAssignment(card, btn, animId, name, auto = false) {
+  const anim = document.getElementById(animId);
+  if (anim) anim.classList.remove('show');
+  if (btn) {
+    btn.style.display = 'none';
+    btn.disabled = true;
+  }
+
+  const badge = card.querySelector('.status-badge');
+  if (badge) { badge.className = 'status-badge badge-posted'; badge.textContent = 'Asignado ✓'; }
+  card.classList.add('postulated');
+
+  if (!card.querySelector('.card-assigned-tag')) {
+    const tag = document.createElement('div');
+    tag.className = 'card-assigned-tag';
+    tag.innerHTML = `<i class="fa-solid fa-user-check"></i> Asignado a: <strong>${name}</strong>${auto ? ' (IA recomendado)' : ''}`;
+    card.appendChild(tag);
+  }
+
+  postulatedCount++;
+  pendingCount = Math.max(0, pendingCount - 1);
+  document.getElementById('stat-postulados').textContent = postulatedCount;
+  updateFabCount();
+
+  if (postulatedCount === 1) {
+    document.getElementById('go-conductor-panel').style.display = 'block';
+  }
+  syncAssignedServiceToActiveDriver(card, name);
+  showNotice(auto ? `🤖 IA asignó a ${name}` : `✅ Asignado a ${name}`);
+}
+
+function syncAssignedServiceToActiveDriver(card, driverName) {
+  if (driverName !== activeDriverName) return;
+  const title = card.querySelector('.srv-card-title')?.textContent || 'Servicio asignado';
+  const code = card.querySelector('.srv-card-code')?.textContent?.split('·')[0]?.trim() || 'SRV-ASIGNADO';
+  const rows = card.querySelectorAll('.srv-card-row');
+  const origin = rows[0]?.textContent?.trim() || 'Origen pendiente';
+  const destination = rows[1]?.textContent?.trim() || 'Destino pendiente';
+  const pack = rows[2]?.textContent?.trim() || 'Paquete';
+  const value = card.querySelector('.srv-value')?.textContent || '$13.000';
+
+  document.getElementById('drv-title-1').textContent = title.replace('Pedido — ', '');
+  document.getElementById('drv-code-1').textContent = code + ' · Asignado a ' + activeDriverName;
+  document.getElementById('drv-origen-1').textContent = origin;
+  document.getElementById('drv-destino-1').textContent = destination;
+  document.getElementById('drv-desc-1').textContent = pack;
+  const driverCard = document.getElementById('drv-card-1');
+  driverCard.style.display = 'block';
+  driverCard.querySelector('.status-badge').className = 'status-badge badge-posted';
+  driverCard.querySelector('.status-badge').textContent = 'Asignado';
+  driverCard.querySelector('.driver-value').textContent = value;
+  routeDetails[1] = {
+    title: title.replace('Pedido — ', ''),
+    code,
+    origin,
+    destination,
+    pack,
+    price: value,
+    eta: '8 min',
+    distance: '2.3 km'
+  };
+  showNotice('🛵 Servicio enviado a Carlos M.');
 }
 
 function assignDriver(chip, name, cardId, animId, auto = false) {
@@ -1532,6 +2945,52 @@ function processWhatsapp() {
 // ════════════════════════
 //  VISTA 3 — CONDUCTOR
 // ════════════════════════
+function toggleDriverMap() {
+  const view = document.getElementById('view-conductor');
+  view.classList.toggle('map-hidden');
+}
+
+const routeDetails = {
+  1: {
+    title: 'Rapidex Express',
+    code: 'SRV-00127',
+    origin: 'Cra 12 #14-30',
+    destination: 'Conjunto Palma Real',
+    pack: 'Documentos',
+    price: '$13.000',
+    eta: '8 min',
+    distance: '2.3 km'
+  },
+  2: {
+    title: 'Los Cortijos',
+    code: 'SRV-00125',
+    origin: 'Calle 16 #9-40',
+    destination: 'Clínica del Cesar',
+    pack: 'Medicamentos urgentes',
+    price: '$15.000',
+    eta: '6 min',
+    distance: '1.8 km'
+  }
+};
+
+function openRouteDetail(id) {
+  const data = routeDetails[id] || routeDetails[1];
+  document.getElementById('route-origin').textContent = data.origin;
+  document.getElementById('route-destination').textContent = data.destination;
+  document.getElementById('route-package').textContent = data.pack;
+  document.getElementById('route-price').textContent = data.price;
+  document.getElementById('route-eta').textContent = data.eta;
+  document.getElementById('route-distance').textContent = data.distance;
+  document.getElementById('route-pickup-chip').innerHTML = 'Recogida<small>' + data.origin + '</small>';
+  document.getElementById('route-dropoff-chip').innerHTML = 'Entrega<small>' + data.destination + '</small>';
+  document.getElementById('route-apply-btn').setAttribute('onclick', 'applyService(' + id + ')');
+  document.getElementById('view-conductor').classList.add('route-open');
+}
+
+function closeRouteDetail() {
+  document.getElementById('view-conductor').classList.remove('route-open');
+}
+
 function applyService(id) {
   const card = document.getElementById('drv-card-' + id);
   const btn  = document.getElementById('apply-btn-' + id);
@@ -1566,6 +3025,7 @@ function applyService(id) {
     card.style.transition = 'opacity .3s';
     setTimeout(() => card.remove(), 300);
 
+    closeRouteDetail();
     showNotice('🛵 ¡Servicio asignado! Ya puedes ir a recoger.');
   }, 1000);
 }
